@@ -9,7 +9,7 @@ class DetalleMoneda extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final esMoneda = moneda['tipo'] == 'moneda';
-    
+
     return Scaffold(
       appBar: AppBar(
         title: Text(moneda['denominacion'] ?? 'Detalle'),
@@ -104,7 +104,10 @@ class DetalleMoneda extends StatelessWidget {
         padding: const EdgeInsets.only(bottom: 12),
         child: Row(
           children: [
-            const SizedBox(width: 120, child: Text('', style: TextStyle(fontWeight: FontWeight.w600))),
+            const SizedBox(
+              width: 120,
+              child: Text('', style: TextStyle(fontWeight: FontWeight.w600)),
+            ),
             const Expanded(child: Text('—')),
           ],
         ),
@@ -123,16 +126,8 @@ class DetalleMoneda extends StatelessWidget {
             child: Image.file(
               File(ruta),
               height: esMoneda ? 200 : 120,
-              width: double.infinity,
+              width: esMoneda ? 200 : double.infinity,
               fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) {
-                return Container(
-                  height: esMoneda ? 200 : 120,
-                  width: double.infinity,
-                  color: Colors.grey[300],
-                  child: const Center(child: Text('Error al cargar la imagen')),
-                );
-              },
             ),
           ),
         ],
