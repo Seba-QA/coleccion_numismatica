@@ -1,0 +1,63 @@
+# Flutter/Dart
+.Dart_tool/
+.Flutter-plugins
+.Flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+/build/
+/ios/
+/macos/
+/windows/
+/linux/
+/web/
+
+# Android
+/android/app/.cxx/
+/android/app/build/
+/android/.gradle/
+/android/local.properties
+/android/*.iml
+/android/.idea/
+
+# VS Code
+/.vscode/
+*.code-workspace
+
+# Android Studio
+*.iml
+.idea/
+.gradle/
+/local.properties
+
+# macOS
+.DS_Store
+*.swp
+*.lock
+
+# Firebase (archivos sensibles)
+/android/app/google-services.json
+/ios/Runner/GoogleService-Info.plist
+
+# Hive (datos locales, no se suben)
+/monedas.hive
+*.hive
+*.hive-lock
+/hive/
+
+# Archivos temporales
+*.log
+*.tmp
+*.pid
+*.seed
+
+# Keys o archivos con datos sensibles (crea uno si los usas)
+/secrets/
+/keys/
+.env
+*.key
+*.pem
+
+# Archivos de backup
+*.bak
+*.old
