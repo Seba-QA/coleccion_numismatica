@@ -1,0 +1,29 @@
+# Pantallas y flujo de navegación
+
+## Pantallas actuales
+
+### 1. ListaMonedas (principal)
+- Muestra todas las monedas en tarjetas
+- Cada tarjeta muestra: denominación (título), país - año (subtítulo)
+- Acciones: 
+  - Editar (ícono lápiz azul)
+  - Eliminar (ícono basurero rojo)
+  - Ver detalles (tap en la tarjeta)
+
+### 2. FormularioOpcional
+- Segunda pantalla al crear/editar
+- Campos: tipo, composición, peso, diámetro, año gregoriano, marca de ceca
+- Selectores de foto: anverso y reverso
+
+### 3. DetalleMoneda
+- Muestra toda la información organizada en secciones:
+  - Información general
+  - Características físicas
+  - Información adicional
+  - Fotos (anverso y reverso)
+
+## Flujo principal
+- Agregar: + → Pantalla1 (obligatorios) → Siguiente → Pantalla2 (opcionales + fotos) → Guardar
+- Editar: lápiz → Pantalla1 (precargada) → Siguiente → Pantalla2 (precargada) → Guardar
+- Eliminar: basurero → eliminación inmediata
+- Ver detalles: tap en tarjeta → pantalla de detalles
