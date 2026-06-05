@@ -1,16 +1,21 @@
-# coleccion_numismatica
+# Colección Numismática
 
-A new Flutter project.
+App móvil para gestionar colección de monedas y billetes.
 
-## Getting Started
+## Características
 
-This project is a starting point for a Flutter application.
+- CRUD completo de monedas y billetes
+- Fotos desde cámara/galería
+- Formato cuadrado para monedas / rectangular para billetes
+- Persistencia local con Hive
+- Pantalla de detalles con toda la información
 
-A few resources to get you started if this is your first Flutter project:
+## Tecnologías
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+- Flutter / Dart
+- Hive (base de datos local)
+- image_picker (cámara/galería)
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Capturas
+
+(próximamente)
