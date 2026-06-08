@@ -1,3 +1,8 @@
+plugins {
+    id("com.android.application") apply false
+    id("com.google.gms.google-services") version "4.4.4" apply false  // ← Agrega esta línea
+}
+
 allprojects {
     repositories {
         google()
