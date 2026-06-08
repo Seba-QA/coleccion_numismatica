@@ -27,3 +27,9 @@
 - Editar: lápiz → Pantalla1 (precargada) → Siguiente → Pantalla2 (precargada) → Guardar
 - Eliminar: basurero → eliminación inmediata
 - Ver detalles: tap en tarjeta → pantalla de detalles
+
+## Sincronización con Firestore (versión actual)
+- **Fuente de verdad:** Firestore (nube).
+- **Operaciones:** Crear, editar, eliminar se ejecutan directamente en Firestore.
+- **Carga inicial:** `_cargarMonedas()` lee desde Firestore y actualiza la UI.
+- **Hive:** Se mantiene solo como respaldo local (lectura inicial o sin internet), pero las escrituras en Hive ya no se usan activamente.

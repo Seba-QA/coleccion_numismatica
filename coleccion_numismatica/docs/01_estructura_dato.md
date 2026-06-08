@@ -8,6 +8,12 @@
 | anio          | String   | "1947"     |
 | cantidad      | String   | "2"        |
 
+### Campo `_id` (interno)
+| Campo | Tipo   | Origen                 | Uso                                                        |
+|-------|--------|------------------------|------------------------------------------------------------|
+| _id   | String | Firestore (automático) | Identificador único del documento en la nube. Se usa para
+                                                            editar/eliminar. No se muestra al usuario. |
+
 ## Campos opcionales
 | Campo         | Tipo      | Ejemplo                   |
 |---------------|-----------|---------------------------|

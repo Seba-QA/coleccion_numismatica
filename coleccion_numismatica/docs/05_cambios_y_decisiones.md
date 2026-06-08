@@ -23,12 +23,24 @@
 - **Implementación**: RadioListTile en primera pantalla
 
 ## Decisión: Formato de fotos según tipo
-- Moneda: cuadrado (150x150 en selector, 200x200 en detalles)
-- Billete: rectangular (ancho completo, 100px alto en selector, 120px en detalles)
+- **Fecha**: 05/06/2026
+- **Moneda**: cuadrado (150x150 en selector, 200x200 en detalles)
+- **Billete**: rectangular (ancho completo, 100px alto en selector, 120px en detalles)
 
 ## Decisión: Persistencia local primero, nube después
+- **Fecha**: 05/06/2026
 - **Motivo**: Aprender conceptos por separado
-- **Estado actual**: Hive funcionando
+- **Estado actual**: Hive funcionando como respaldo local, Firestore como fuente de verdad desde el 08/06/2026
+
+## Decisión: Migrar a Firestore como fuente de verdad
+- **Fecha**: 08/06/2026
+- **Motivo**: Los datos no persistían correctamente al editar/eliminar porque Hive y Firestore estaban desincronizados.
+- **Cambio**: Se eliminaron las operaciones de escritura en Hive (add, putAt, deleteAt) y ahora todo se hace directamente en Firestore.
+- **Resultado**: La edición y eliminación funcionan correctamente, y los cambios persisten al reiniciar la app.
+
+## Decisión: Función `_cargarMonedas` como `Future<void>`
+- **Fecha**: 08/06/2026
+- **Motivo**: El uso de `await` en funciones `void` generaba errores. Se cambió a `Future<void>` para permitir esperar su finalización.
 
 ## Problemas resueltos
 1. ADB no reconocido → agregar platform-tools al PATH
@@ -36,4 +48,16 @@
 3. pubspec.yaml mal indentado → respetar espacios YAML
 4. Hive type cast error → usar Box sin tipo genérico y convertir manualmente
 5. Lista no actualizaba → crear función _recargarLista()
-6. Al usar `if` dentro de `Column`, los elementos se pegaban visualmente -> Agregar `Divider(height: 32)` o `SizedBox(height: 16)` entre secciones lógicas
+6. Al usar `if` dentro de `Column`, los elementos se pegaban visualmente → agregar `Divider(height: 32)` o `SizedBox(height: 16)` entre secciones lógicas
+7. Firestore API deshabilitada → habilitar desde Google Cloud Console y crear base de datos en modo nativo
+8. Edición/eliminación no persistían → migrar a Firestore como fuente de verdad y recargar lista con `_cargarMonedas()`
+9. `_id` faltante en monedas antiguas → reinstalar app y crear nuevos registros; en código, verificar existencia antes de editar
+
+## Pendientes para próxima sesión
+- Verificar que las fotos copiadas al directorio permanente no se pierdan al cerrar/abrir la app
+- Implementar recorte de imágenes (crop)
+- Login con email/Google para compartir colección entre dispositivos
+- Búsqueda y filtros (país, año, tipo, denominación)
+- Exportar/importar datos (JSON/CSV)
+- Mejoras visuales (modo oscuro, animaciones)
+- Pruebas en modo release (APK sin conexión al PC)
