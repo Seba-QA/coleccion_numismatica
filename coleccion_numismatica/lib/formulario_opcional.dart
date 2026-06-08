@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'selector_imagen.dart';
 
+
 class FormularioOpcional extends StatefulWidget {
   final Map<String, String> datosObligatorios;
   final Map<String, String>? datosOpcionalesExistentes;

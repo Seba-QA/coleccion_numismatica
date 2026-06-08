@@ -3,15 +3,32 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:path_provider/path_provider.dart' as path_provider;
 import 'formulario_opcional.dart';
 import 'detalle_moneda.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  final appDocumentDir = await path_provider.getApplicationDocumentsDirectory();
-  Hive.init(appDocumentDir.path);
-
-  runApp(const ColeccionNumismaticaApp());
+  try {
+    await Firebase.initializeApp();
+    final auth = FirebaseAuth.instance;
+    User? user = auth.currentUser;
+    if (user == null) {
+      await auth.signInAnonymously();
+      print('Usuario anónimo creado: ${auth.currentUser?.uid}');
+    } else {
+      print('Usuario ya existente: ${user.uid}');
+    }
+    final appDocumentDir = await path_provider.getApplicationDocumentsDirectory();
+    Hive.init(appDocumentDir.path);
+    runApp(const ColeccionNumismaticaApp());
+  } catch (e, stack) {
+    print('Error en main: $e');
+    print(stack);
+    runApp(MaterialApp(home: Scaffold(body: Center(child: Text('Error: $e')))));
+  }
 }
+
 
 class ColeccionNumismaticaApp extends StatelessWidget {
   const ColeccionNumismaticaApp({super.key});
@@ -42,7 +59,7 @@ class _ListaMonedasState extends State<ListaMonedas> {
   final TextEditingController _denominacionController = TextEditingController();
   final TextEditingController _cantidadController = TextEditingController();
   
-  String _tipoSeleccionado = 'moneda'; // NUEVO: para moneda o billete
+  String _tipoSeleccionado = 'moneda';
 
   @override
   void initState() {
@@ -50,10 +67,42 @@ class _ListaMonedasState extends State<ListaMonedas> {
     _cargarMonedas();
   }
 
+  // ===================== CARGA DESDE FIRESTORE =====================
   void _cargarMonedas() async {
+    print('=== INICIANDO CARGA DE MONEDAS ===');
     _monedasBox = await Hive.openBox('monedas');
-    print('Box abierto, contiene: ${_monedasBox.length} monedas');
-    _recargarLista();
+    
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      final snapshot = await FirebaseFirestore.instance
+          .collection('usuarios')
+          .doc(user.uid)
+          .collection('monedas')
+          .get();
+      print('Número de documentos en Firestore: ${snapshot.docs.length}');
+      for (var doc in snapshot.docs) {
+        print('Documento ID: ${doc.id}');
+        print('Datos: ${doc.data()}');
+      }
+      final List<Map<String, String>> listaFirestore = [];
+      for (var doc in snapshot.docs) {
+        print('Monedas convertidas: ${listaFirestore.length}');
+        for (var moneda in listaFirestore) {
+          print('Moneda: ${moneda['denominacion']} - ${moneda['pais']}');
+        }
+        final data = doc.data() as Map<String, dynamic>;
+        final moneda = Map<String, String>.from(data);
+        moneda['_id'] = doc.id; // Guardamos el ID de Firestore
+        listaFirestore.add(moneda);
+      }
+      print('Actualizando UI con ${listaFirestore.length} monedas');
+      setState(() {
+        _monedas = listaFirestore;
+      });
+      print('Cargadas ${_monedas.length} monedas desde Firestore');
+    } else {
+      _recargarLista(); // fallback a Hive
+    }
   }
 
   void _recargarLista() {
@@ -71,6 +120,7 @@ class _ListaMonedasState extends State<ListaMonedas> {
     print('Lista recargada: ${_monedas.length} monedas');
   }
 
+  // ===================== CONSTRUCTOR DE VISTA =====================
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -113,8 +163,21 @@ class _ListaMonedasState extends State<ListaMonedas> {
                         ),
                         IconButton(
                           icon: const Icon(Icons.delete, color: Colors.red),
-                          onPressed: () {
-                            _monedasBox.deleteAt(index);
+                          onPressed: () async {
+                            final monedaAEliminar = _monedas[index];
+                            // Eliminar de Hive
+                            await _monedasBox.deleteAt(index);
+                            // Eliminar de Firestore si tiene _id
+                            final user = FirebaseAuth.instance.currentUser;
+                            if (user != null && monedaAEliminar.containsKey('_id')) {
+                              await FirebaseFirestore.instance
+                                  .collection('usuarios')
+                                  .doc(user.uid)
+                                  .collection('monedas')
+                                  .doc(monedaAEliminar['_id'])
+                                  .delete();
+                              print('Moneda eliminada de Firestore');
+                            }
                             _recargarLista();
                           },
                         ),
@@ -137,6 +200,7 @@ class _ListaMonedasState extends State<ListaMonedas> {
     );
   }
 
+  // ===================== FORMULARIO OBLIGATORIOS =====================
   void _mostrarFormulario({int? indice, Map<String, String>? monedaEditada}) {
     if (monedaEditada != null) {
       _denominacionController.text = monedaEditada['denominacion'] ?? '';
@@ -156,9 +220,7 @@ class _ListaMonedasState extends State<ListaMonedas> {
       context: context,
       barrierDismissible: false,
       builder: (context) {
-        // Variable local para el tipo dentro del diálogo
         String tipoLocal = _tipoSeleccionado;
-        
         return StatefulBuilder(
           builder: (context, setStateDialog) {
             return AlertDialog(
@@ -167,7 +229,6 @@ class _ListaMonedasState extends State<ListaMonedas> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    // Selector de tipo (Moneda / Billete)
                     Row(
                       children: [
                         Expanded(
@@ -242,6 +303,7 @@ class _ListaMonedasState extends State<ListaMonedas> {
     );
   }
 
+  // ===================== FORMULARIO OPCIONAL Y GUARDADO =====================
   void _mostrarFormularioOpcional({
     required Map<String, String> datosObligatorios,
     int? indice,
@@ -274,15 +336,42 @@ class _ListaMonedasState extends State<ListaMonedas> {
     if (resultado != null) {
       final monedaCompleta = resultado['moneda'] as Map<String, String>;
       final indiceEdit = resultado['indice'] as int?;
-
+      
       final monedaParaGuardar = Map<String, String>.from(monedaCompleta);
-
+      final user = FirebaseAuth.instance.currentUser;
+      
       if (indiceEdit != null) {
+        // === EDITAR ===
+        // Actualizar Hive
         await _monedasBox.putAt(indiceEdit, monedaParaGuardar);
+        // Actualizar Firestore si tiene _id
+        if (user != null && monedaParaGuardar.containsKey('_id')) {
+          await FirebaseFirestore.instance
+              .collection('usuarios')
+              .doc(user.uid)
+              .collection('monedas')
+              .doc(monedaParaGuardar['_id'])
+              .update(monedaParaGuardar);
+          print('Moneda actualizada en Firestore');
+        }
       } else {
+        // === CREAR NUEVA ===
+        // Guardar en Hive
         await _monedasBox.add(monedaParaGuardar);
+        // Guardar en Firestore y obtener ID
+        if (user != null) {
+          final docRef = await FirebaseFirestore.instance
+              .collection('usuarios')
+              .doc(user.uid)
+              .collection('monedas')
+              .add(monedaParaGuardar);
+          // Agregar el ID a la moneda y actualizar Hive (para mantener consistencia)
+          monedaParaGuardar['_id'] = docRef.id;
+          await _monedasBox.putAt(_monedasBox.length - 1, monedaParaGuardar);
+          print('Moneda guardada en Firestore con id: ${docRef.id}');
+        }
       }
-
+      
       _recargarLista();
     }
   }
