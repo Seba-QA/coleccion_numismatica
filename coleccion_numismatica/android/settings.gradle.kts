@@ -22,4 +22,12 @@ plugins {
     id("org.jetbrains.kotlin.android") version "2.2.0" apply false
 }
 
+dependencyResolutionManagement {
+    repositories {
+        google()
+        mavenCentral()
+        maven { url = uri("https://jitpack.io") } // ¡Agrega esta línea!
+    }
+}
+
 include(":app")

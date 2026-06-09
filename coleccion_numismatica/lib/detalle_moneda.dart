@@ -16,38 +16,40 @@ class DetalleMoneda extends StatelessWidget {
         backgroundColor: Colors.blue,
         foregroundColor: Colors.white,
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildSeccion('Fotos', [
-              _buildFoto('Anverso', moneda['fotoAnverso'], esMoneda),
-              const SizedBox(height: 8),
-              _buildFoto('Reverso', moneda['fotoReverso'], esMoneda),
-            ]),
-            const SizedBox(height: 24),
-            _buildSeccion('Información general', [
-              _buildCampo('Tipo', esMoneda ? 'Moneda' : 'Billete'),
-              _buildCampo('Denominación', moneda['denominacion']),
-              _buildCampo('País', moneda['pais']),
-              _buildCampo('Año', moneda['anio']),
-              _buildCampo('Cantidad', moneda['cantidad']),
-            ]),
-            if (esMoneda) ...[
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildSeccion('Fotos', [
+                _buildFoto('Anverso', moneda['fotoAnverso'], esMoneda),
+                const SizedBox(height: 8),
+                _buildFoto('Reverso', moneda['fotoReverso'], esMoneda),
+              ]),
               const SizedBox(height: 24),
-              _buildSeccion('Características físicas', [
-                _buildCampo('Composición', moneda['composicion']),
-                _buildCampo('Peso (g)', moneda['peso']),
-                _buildCampo('Diámetro (mm)', moneda['diametro']),
+              _buildSeccion('Información general', [
+                _buildCampo('Tipo', esMoneda ? 'Moneda' : 'Billete'),
+                _buildCampo('Denominación', moneda['denominacion']),
+                _buildCampo('País', moneda['pais']),
+                _buildCampo('Año', moneda['anio']),
+                _buildCampo('Cantidad', moneda['cantidad']),
+              ]),
+              if (esMoneda) ...[
+                const SizedBox(height: 24),
+                _buildSeccion('Características físicas', [
+                  _buildCampo('Composición', moneda['composicion']),
+                  _buildCampo('Peso (g)', moneda['peso']),
+                  _buildCampo('Diámetro (mm)', moneda['diametro']),
+                ]),
+              ],
+              const SizedBox(height: 24),
+              _buildSeccion('Información adicional', [
+                _buildCampo('Año gregoriano', moneda['anioGregoriano']),
+                _buildCampo('Marca de ceca', moneda['marcaCeca']),
               ]),
             ],
-            const SizedBox(height: 24),
-            _buildSeccion('Información adicional', [
-              _buildCampo('Año gregoriano', moneda['anioGregoriano']),
-              _buildCampo('Marca de ceca', moneda['marcaCeca']),
-            ]),
-          ],
+          ),
         ),
       ),
     );
