@@ -72,23 +72,40 @@ class _PantallaAuthState extends State<PantallaAuth> {
       String mensaje;
       switch (e.code) {
         case 'user-not-found':
-          mensaje = 'Usuario no encontrado';
+          mensaje = 'No existe una cuenta con este correo electrónico';
           break;
         case 'wrong-password':
-          mensaje = 'Contraseña incorrecta';
+          mensaje = 'Contraseña incorrecta. Por favor, inténtalo de nuevo';
           break;
         case 'email-already-in-use':
-          mensaje = 'El email ya está registrado';
+          mensaje =
+              'Este correo electrónico ya está registrado. ¿Quieres iniciar sesión?';
           break;
         case 'weak-password':
-          mensaje = 'La contraseña es muy débil (mínimo 6 caracteres)';
+          mensaje = 'La contraseña es muy débil. Usa al menos 6 caracteres';
+          break;
+        case 'invalid-email':
+          mensaje = 'El formato del correo electrónico no es válido';
+          break;
+        case 'user-disabled':
+          mensaje = 'Esta cuenta ha sido deshabilitada. Contacta con soporte';
+          break;
+        case 'operation-not-allowed':
+          mensaje =
+              'El inicio de sesión con email/contraseña no está habilitado';
           break;
         default:
-          mensaje = 'Error: ${e.message}';
+          mensaje = 'Error al iniciar sesión: ${e.message}';
       }
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(mensaje)));
-    } finally {
-      if (mounted) setState(() => _isLoading = false);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(mensaje),
+          backgroundColor: Colors.red.shade700,
+          behavior: SnackBarBehavior.floating,
+          duration: const Duration(seconds: 3),
+        ),
+      );
     }
   }
 
@@ -102,7 +119,8 @@ class _PantallaAuthState extends State<PantallaAuth> {
           if (mounted) setState(() => _isLoading = false);
           return;
         }
-        final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+        final GoogleSignInAuthentication googleAuth =
+            await googleUser.authentication;
         final credential = GoogleAuthProvider.credential(
           accessToken: googleAuth.accessToken,
           idToken: googleAuth.idToken,
@@ -110,7 +128,9 @@ class _PantallaAuthState extends State<PantallaAuth> {
         await _auth.linkAnonymousAccount(credential);
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Cuenta de Google vinculada correctamente.')),
+            const SnackBar(
+              content: Text('Cuenta de Google vinculada correctamente.'),
+            ),
           );
           Navigator.pushReplacement(
             context,
@@ -134,7 +154,14 @@ class _PantallaAuthState extends State<PantallaAuth> {
     } catch (e) {
       print('Error en Google Sign-In: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Error con Google Sign-In')),
+        SnackBar(
+          content: const Text(
+            'Error al iniciar sesión con Google. Verifica tu conexión e inténtalo de nuevo.',
+          ),
+          backgroundColor: Colors.red.shade700,
+          behavior: SnackBarBehavior.floating,
+          duration: const Duration(seconds: 3),
+        ),
       );
       if (mounted) setState(() => _isLoading = false);
     }
@@ -171,25 +198,35 @@ class _PantallaAuthState extends State<PantallaAuth> {
               const SizedBox(height: 20),
               TextFormField(
                 controller: _emailController,
-                decoration: const InputDecoration(labelText: 'Correo electrónico'),
+                decoration: const InputDecoration(
+                  labelText: 'Correo electrónico',
+                ),
                 keyboardType: TextInputType.emailAddress,
-                validator: (value) => value!.contains('@') ? null : 'Email inválido',
+                validator:
+                    (value) => value!.contains('@') ? null : 'Email inválido',
               ),
               const SizedBox(height: 12),
               TextFormField(
                 controller: _passwordController,
                 decoration: const InputDecoration(labelText: 'Contraseña'),
                 obscureText: true,
-                validator: (value) => value!.length >= 6 ? null : 'Mínimo 6 caracteres',
+                validator:
+                    (value) =>
+                        value!.length >= 6 ? null : 'Mínimo 6 caracteres',
               ),
               if (!_isLogin) ...[
                 const SizedBox(height: 12),
                 TextFormField(
                   controller: _confirmController,
-                  decoration: const InputDecoration(labelText: 'Confirmar contraseña'),
+                  decoration: const InputDecoration(
+                    labelText: 'Confirmar contraseña',
+                  ),
                   obscureText: true,
-                  validator: (value) =>
-                      value == _passwordController.text ? null : 'Las contraseñas no coinciden',
+                  validator:
+                      (value) =>
+                          value == _passwordController.text
+                              ? null
+                              : 'Las contraseñas no coinciden',
                 ),
               ],
               const SizedBox(height: 24),
@@ -198,7 +235,9 @@ class _PantallaAuthState extends State<PantallaAuth> {
               else
                 ElevatedButton(
                   onPressed: _submit,
-                  style: ElevatedButton.styleFrom(minimumSize: const Size(double.infinity, 45)),
+                  style: ElevatedButton.styleFrom(
+                    minimumSize: const Size(double.infinity, 45),
+                  ),
                   child: Text(_isLogin ? 'Ingresar' : 'Registrarse'),
                 ),
               const SizedBox(height: 12),
@@ -206,7 +245,9 @@ class _PantallaAuthState extends State<PantallaAuth> {
                 onPressed: _googleSignIn,
                 icon: const Icon(Icons.g_mobiledata, color: Colors.red),
                 label: const Text('Continuar con Google'),
-                style: OutlinedButton.styleFrom(minimumSize: const Size(double.infinity, 45)),
+                style: OutlinedButton.styleFrom(
+                  minimumSize: const Size(double.infinity, 45),
+                ),
               ),
               const SizedBox(height: 12),
               TextButton(
@@ -222,7 +263,13 @@ class _PantallaAuthState extends State<PantallaAuth> {
                     }
                   } catch (e) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Error al ingresar como invitado')),
+                      SnackBar(
+                        content: const Text(
+                          'No se pudo ingresar como invitado. Inténtalo de nuevo.',
+                        ),
+                        backgroundColor: Colors.red.shade700,
+                        behavior: SnackBarBehavior.floating,
+                      ),
                     );
                   } finally {
                     if (mounted) setState(() => _isLoading = false);

@@ -14,14 +14,17 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   try {
     await Firebase.initializeApp();
-    final auth = FirebaseAuth.instance;
-    User? user = auth.currentUser;
-    if (user == null) {
-      await auth.signInAnonymously();
-      print('Usuario anónimo creado: ${auth.currentUser?.uid}');
-    } else {
-      print('Usuario ya existente: ${user.uid}');
-    }
+    // final auth = FirebaseAuth.instance;
+    // User? user = auth.currentUser;
+    // if (user == null) {
+    //   await auth.signInAnonymously();
+    //   print('Usuario anónimo creado: ${auth.currentUser?.uid}');
+    // } else {
+    //   print('Usuario ya existente: ${user.uid}');
+    // }
+    // No creamos usuario anónimo automáticamente.
+    // El usuario deberá tocar "Seguir como invitado" si quiere modo invitado.
+    print('Esperando acción del usuario (login o invitado)');
     final appDocumentDir =
         await path_provider.getApplicationDocumentsDirectory();
     Hive.init(appDocumentDir.path);
