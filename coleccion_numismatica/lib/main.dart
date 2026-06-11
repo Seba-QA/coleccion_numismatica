@@ -79,18 +79,56 @@ class ListaMonedas extends StatefulWidget {
 class _ListaMonedasState extends State<ListaMonedas> {
   late Box _monedasBox;
   List<Map<String, String>> _monedas = [];
+  String _tipoSeleccionado = 'moneda';
+  List<Map<String, String>> _filteredMonedas = [];
+  String _searchQuery = '';
+  String? _filterTipo;
 
   final TextEditingController _paisController = TextEditingController();
   final TextEditingController _anioController = TextEditingController();
   final TextEditingController _denominacionController = TextEditingController();
   final TextEditingController _cantidadController = TextEditingController();
-
-  String _tipoSeleccionado = 'moneda';
+  final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     _cargarMonedas();
+  }
+
+  @override
+  void dispose() {
+    _paisController.dispose();
+    _anioController.dispose();
+    _denominacionController.dispose();
+    _cantidadController.dispose();
+    _searchController.dispose();
+    super.dispose();
+  }
+  
+  void _applyFilters() {
+    List<Map<String, String>> resultado = List.from(_monedas);
+
+    // 1. Filtro por texto de búsqueda (denominación, país o año)
+    if (_searchQuery.isNotEmpty) {
+      resultado =
+          resultado.where((moneda) {
+            final query = _searchQuery.toLowerCase();
+            return moneda['denominacion']!.toLowerCase().contains(query) ||
+                moneda['pais']!.toLowerCase().contains(query) ||
+                moneda['anio']!.toLowerCase().contains(query);
+          }).toList();
+    }
+
+    // 2. Filtro por tipo (moneda / billete)
+    if (_filterTipo != null) {
+      resultado =
+          resultado.where((moneda) => moneda['tipo'] == _filterTipo).toList();
+    }
+
+    setState(() {
+      _filteredMonedas = resultado;
+    });
   }
 
   // ===================== CARGA DESDE FIRESTORE =====================
@@ -118,6 +156,7 @@ class _ListaMonedasState extends State<ListaMonedas> {
       setState(() {
         _monedas = listaFirestore;
       });
+      _applyFilters();
       print('Cargadas ${_monedas.length} monedas desde Firestore');
     } else {
       _recargarLista();
@@ -152,7 +191,6 @@ class _ListaMonedasState extends State<ListaMonedas> {
         backgroundColor: Colors.blue,
         foregroundColor: Colors.white,
         actions: [
-          // ← AGREGAR ESTO
           IconButton(
             icon: const Icon(Icons.person),
             onPressed: () {
@@ -165,101 +203,176 @@ class _ListaMonedasState extends State<ListaMonedas> {
         ],
       ),
       body: SafeArea(
-        child:
-            _monedas.isEmpty
-                ? const Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.currency_bitcoin,
-                        size: 64,
-                        color: Colors.grey,
-                      ),
-                      SizedBox(height: 16),
-                      Text(
-                        'No hay monedas o billetes',
-                        style: TextStyle(fontSize: 18, color: Colors.grey),
-                      ),
-                      Text(
-                        'Toca el botón + para agregar',
-                        style: TextStyle(color: Colors.grey),
-                      ),
-                    ],
+        child: Column(
+          children: [
+            // Campo de búsqueda
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: TextField(
+                controller: _searchController,
+                decoration: InputDecoration(
+                  hintText: 'Buscar por país, denominación o año...',
+                  prefixIcon: const Icon(Icons.search),
+                  suffixIcon:
+                      _searchQuery.isNotEmpty
+                          ? IconButton(
+                            icon: const Icon(Icons.clear),
+                            onPressed: () {
+                              _searchController.clear();
+                              _searchQuery = '';
+                              _applyFilters();
+                            },
+                          )
+                          : null,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                )
-                : ListView.builder(
-                  itemCount: _monedas.length,
-                  itemBuilder: (context, index) {
-                    final moneda = _monedas[index];
-                    final esMoneda = moneda['tipo'] == 'moneda';
-                    return Card(
-                      margin: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 8,
-                      ),
-                      child: ListTile(
-                        leading: Icon(
-                          esMoneda ? Icons.monetization_on : Icons.attach_money,
-                          color: Colors.amber,
+                ),
+                onChanged: (value) {
+                  _searchQuery = value;
+                  _applyFilters();
+                },
+              ),
+            ),
+            // Filtros de tipo
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              child: Row(
+                children: [
+                  const Text('Mostrar:'),
+                  const SizedBox(width: 8),
+                  ChoiceChip(
+                    label: const Text('Todos'),
+                    selected: _filterTipo == null,
+                    onSelected: (selected) {
+                      setState(() {
+                        _filterTipo = null;
+                      });
+                      _applyFilters();
+                    },
+                  ),
+                  const SizedBox(width: 8),
+                  ChoiceChip(
+                    label: const Text('Monedas'),
+                    selected: _filterTipo == 'moneda',
+                    onSelected: (selected) {
+                      setState(() {
+                        _filterTipo = selected ? 'moneda' : null;
+                      });
+                      _applyFilters();
+                    },
+                  ),
+                  const SizedBox(width: 8),
+                  ChoiceChip(
+                    label: const Text('Billetes'),
+                    selected: _filterTipo == 'billete',
+                    onSelected: (selected) {
+                      setState(() {
+                        _filterTipo = selected ? 'billete' : null;
+                      });
+                      _applyFilters();
+                    },
+                  ),
+                ],
+              ),
+            ),
+            // Lista de resultados filtrados
+            Expanded(
+              child:
+                  _filteredMonedas.isEmpty
+                      ? const Center(
+                        child: Text(
+                          'No hay monedas o billetes que coincidan con la búsqueda',
                         ),
-                        title: Text(
-                          moneda['denominacion']!,
-                          style: const TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        subtitle: Text(
-                          '${moneda['pais']} - ${moneda['anio']} - ${esMoneda ? "Moneda" : "Billete"}',
-                        ),
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            IconButton(
-                              icon: const Icon(Icons.edit, color: Colors.blue),
-                              onPressed: () {
-                                _mostrarFormulario(
-                                  indice: index,
-                                  monedaEditada: moneda,
+                      )
+                      : ListView.builder(
+                        itemCount: _filteredMonedas.length,
+                        itemBuilder: (context, index) {
+                          final moneda = _filteredMonedas[index];
+                          final esMoneda = moneda['tipo'] == 'moneda';
+                          return Card(
+                            margin: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 8,
+                            ),
+                            child: ListTile(
+                              leading: Icon(
+                                esMoneda
+                                    ? Icons.monetization_on
+                                    : Icons.attach_money,
+                                color: Colors.amber,
+                              ),
+                              title: Text(
+                                moneda['denominacion']!,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              subtitle: Text(
+                                '${moneda['pais']} - ${moneda['anio']} - ${esMoneda ? "Moneda" : "Billete"}',
+                              ),
+                              trailing: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  IconButton(
+                                    icon: const Icon(
+                                      Icons.edit,
+                                      color: Colors.blue,
+                                    ),
+                                    onPressed: () {
+                                      // Usamos la moneda de la lista filtrada, el índice no importa porque la edición usa el _id
+                                      _mostrarFormulario(
+                                        indice: index,
+                                        monedaEditada: moneda,
+                                      );
+                                    },
+                                  ),
+                                  IconButton(
+                                    icon: const Icon(
+                                      Icons.delete,
+                                      color: Colors.red,
+                                    ),
+                                    onPressed: () async {
+                                      final monedaAEliminar =
+                                          _filteredMonedas[index];
+                                      final user =
+                                          FirebaseAuth.instance.currentUser;
+                                      if (user != null &&
+                                          monedaAEliminar.containsKey('_id')) {
+                                        await FirebaseFirestore.instance
+                                            .collection('usuarios')
+                                            .doc(user.uid)
+                                            .collection('monedas')
+                                            .doc(monedaAEliminar['_id'])
+                                            .delete();
+                                        print('Moneda eliminada de Firestore');
+                                      } else {
+                                        print(
+                                          'Error: no se encontró _id para eliminar',
+                                        );
+                                      }
+                                      await _cargarMonedas(); // Recarga completa y aplica filtros
+                                    },
+                                  ),
+                                ],
+                              ),
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder:
+                                        (context) =>
+                                            DetalleMoneda(moneda: moneda),
+                                  ),
                                 );
                               },
-                            ),
-                            IconButton(
-                              icon: const Icon(Icons.delete, color: Colors.red),
-                              onPressed: () async {
-                                final monedaAEliminar = _monedas[index];
-                                final user = FirebaseAuth.instance.currentUser;
-                                if (user != null &&
-                                    monedaAEliminar.containsKey('_id')) {
-                                  await FirebaseFirestore.instance
-                                      .collection('usuarios')
-                                      .doc(user.uid)
-                                      .collection('monedas')
-                                      .doc(monedaAEliminar['_id'])
-                                      .delete();
-                                  print('Moneda eliminada de Firestore');
-                                } else {
-                                  print(
-                                    'Error: no se encontró _id para eliminar',
-                                  );
-                                }
-                                // Recargar desde Firestore para actualizar la UI
-                                await _cargarMonedas();
-                              },
-                            ),
-                          ],
-                        ),
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder:
-                                  (context) => DetalleMoneda(moneda: moneda),
                             ),
                           );
                         },
                       ),
-                    );
-                  },
-                ),
+            ),
+          ],
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _mostrarFormulario(),

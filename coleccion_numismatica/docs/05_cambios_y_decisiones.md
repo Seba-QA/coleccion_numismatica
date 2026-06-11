@@ -47,22 +47,17 @@
 - **Motivo**: Mejorar la experiencia de usuario al ajustar fotos de monedas y billetes.
 - **Resultado**: El usuario puede recortar la imagen con relación de aspecto fija (1:1 para monedas, 3:2 para billetes) antes de guardarla.
 
-
-Ahora que el login y perfil están funcionando, el usuario puede registrarse y vincular su cuenta anónima. Esto completa una de las tareas más importantes. Vamos a actualizar la documentación y luego definir los próximos pasos.
-
-📝 Actualización de documentación
-Añade lo siguiente a tu docs/05_cambios_y_decisiones.md:
-
-markdown
 ## Decisión: Implementar autenticación completa (email/Google) y perfil de usuario
 - **Fecha**: 10/06/2026
 - **Motivo**: Permitir a los usuarios guardar su colección en la nube y acceder desde cualquier dispositivo.
 - **Implementación**:
   - Servicio centralizado `ServicioAuth` con métodos: iniciarSesionEmail, registrarEmail, iniciarSesionGoogle, vincularCuentaAnonima, cerrarSesion.
-  - Pantalla `PantallaAuth` con alternancia entre login/registro y botón de Google.
-  - Pantalla `PantallaPerfil` que muestra email, método de autenticación, opción de vincular si es anónimo, y botón de cierre de sesión.
-  - Vinculación de cuenta anónima a email/Google sin pérdida de datos existentes.
-- **Resultado**: Los usuarios pueden crear una cuenta permanente y sus monedas se mantienen al vincular.
+
+## Decisión: Implementar búsqueda y filtros en la lista principal
+- **Fecha**: 11/06/2026
+- **Motivo**: Mejorar la experiencia de usuario permitiendo localizar rápidamente una moneda o billete específico dentro de la colección.
+
+Ahora que el login y perfil están funcionando, el usuario puede registrarse y vincular su cuenta anónima. Esto completa una de las tareas más importantes. Vamos a actualizar la documentación y luego definir los próximos pasos.
 
 ## Problemas resueltos
 1. ADB no reconocido → agregar platform-tools al PATH
