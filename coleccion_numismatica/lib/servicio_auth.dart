@@ -88,4 +88,9 @@ class ServicioAuth {
       rethrow;
     }
   }
+
+  Future<void> cerrarSesion() async {
+    await _googleSignIn.signOut();
+    await _auth.signOut();
+  }
 }

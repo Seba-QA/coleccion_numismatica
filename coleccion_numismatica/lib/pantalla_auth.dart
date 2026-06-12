@@ -179,105 +179,115 @@ class _PantallaAuthState extends State<PantallaAuth> {
         padding: const EdgeInsets.all(20),
         child: Form(
           key: _formKey,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              SegmentedButton<String>(
-                segments: const [
-                  ButtonSegment(value: 'login', label: Text('Iniciar sesión')),
-                  ButtonSegment(value: 'registro', label: Text('Registrarse')),
-                ],
-                selected: {_isLogin ? 'login' : 'registro'},
-                onSelectionChanged: (Set<String> selection) {
-                  setState(() {
-                    _isLogin = selection.first == 'login';
-                    _confirmController.clear();
-                  });
-                },
-              ),
-              const SizedBox(height: 20),
-              TextFormField(
-                controller: _emailController,
-                decoration: const InputDecoration(
-                  labelText: 'Correo electrónico',
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                SegmentedButton<String>(
+                  segments: const [
+                    ButtonSegment(
+                      value: 'login',
+                      label: Text('Iniciar sesión'),
+                    ),
+                    ButtonSegment(
+                      value: 'registro',
+                      label: Text('Registrarse'),
+                    ),
+                  ],
+                  selected: {_isLogin ? 'login' : 'registro'},
+                  onSelectionChanged: (Set<String> selection) {
+                    setState(() {
+                      _isLogin = selection.first == 'login';
+                      _confirmController.clear();
+                    });
+                  },
                 ),
-                keyboardType: TextInputType.emailAddress,
-                validator:
-                    (value) => value!.contains('@') ? null : 'Email inválido',
-              ),
-              const SizedBox(height: 12),
-              TextFormField(
-                controller: _passwordController,
-                decoration: const InputDecoration(labelText: 'Contraseña'),
-                obscureText: true,
-                validator:
-                    (value) =>
-                        value!.length >= 6 ? null : 'Mínimo 6 caracteres',
-              ),
-              if (!_isLogin) ...[
+                const SizedBox(height: 20),
+                TextFormField(
+                  controller: _emailController,
+                  decoration: const InputDecoration(
+                    labelText: 'Correo electrónico',
+                  ),
+                  keyboardType: TextInputType.emailAddress,
+                  validator:
+                      (value) => value!.contains('@') ? null : 'Email inválido',
+                ),
                 const SizedBox(height: 12),
                 TextFormField(
-                  controller: _confirmController,
-                  decoration: const InputDecoration(
-                    labelText: 'Confirmar contraseña',
-                  ),
+                  controller: _passwordController,
+                  decoration: const InputDecoration(labelText: 'Contraseña'),
                   obscureText: true,
                   validator:
                       (value) =>
-                          value == _passwordController.text
-                              ? null
-                              : 'Las contraseñas no coinciden',
+                          value!.length >= 6 ? null : 'Mínimo 6 caracteres',
                 ),
-              ],
-              const SizedBox(height: 24),
-              if (_isLoading)
-                const CircularProgressIndicator()
-              else
-                ElevatedButton(
-                  onPressed: _submit,
-                  style: ElevatedButton.styleFrom(
+                if (!_isLogin) ...[
+                  const SizedBox(height: 12),
+                  TextFormField(
+                    controller: _confirmController,
+                    decoration: const InputDecoration(
+                      labelText: 'Confirmar contraseña',
+                    ),
+                    obscureText: true,
+                    validator:
+                        (value) =>
+                            value == _passwordController.text
+                                ? null
+                                : 'Las contraseñas no coinciden',
+                  ),
+                ],
+                const SizedBox(height: 24),
+                if (_isLoading)
+                  const CircularProgressIndicator()
+                else
+                  ElevatedButton(
+                    onPressed: _submit,
+                    style: ElevatedButton.styleFrom(
+                      minimumSize: const Size(double.infinity, 45),
+                    ),
+                    child: Text(_isLogin ? 'Ingresar' : 'Registrarse'),
+                  ),
+                const SizedBox(height: 12),
+                OutlinedButton.icon(
+                  onPressed: _googleSignIn,
+                  icon: const Icon(Icons.g_mobiledata, color: Colors.red),
+                  label: const Text('Continuar con Google'),
+                  style: OutlinedButton.styleFrom(
                     minimumSize: const Size(double.infinity, 45),
                   ),
-                  child: Text(_isLogin ? 'Ingresar' : 'Registrarse'),
                 ),
-              const SizedBox(height: 12),
-              OutlinedButton.icon(
-                onPressed: _googleSignIn,
-                icon: const Icon(Icons.g_mobiledata, color: Colors.red),
-                label: const Text('Continuar con Google'),
-                style: OutlinedButton.styleFrom(
-                  minimumSize: const Size(double.infinity, 45),
-                ),
-              ),
-              const SizedBox(height: 12),
-              TextButton(
-                onPressed: () async {
-                  setState(() => _isLoading = true);
-                  try {
-                    await _auth.iniciarSesionAnonimo();
-                    if (mounted) {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(builder: (_) => const ListaMonedas()),
-                      );
-                    }
-                  } catch (e) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: const Text(
-                          'No se pudo ingresar como invitado. Inténtalo de nuevo.',
+                const SizedBox(height: 12),
+                TextButton(
+                  onPressed: () async {
+                    setState(() => _isLoading = true);
+                    try {
+                      await _auth.iniciarSesionAnonimo();
+                      if (mounted) {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const ListaMonedas(),
+                          ),
+                        );
+                      }
+                    } catch (e) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: const Text(
+                            'No se pudo ingresar como invitado. Inténtalo de nuevo.',
+                          ),
+                          backgroundColor: Colors.red.shade700,
+                          behavior: SnackBarBehavior.floating,
                         ),
-                        backgroundColor: Colors.red.shade700,
-                        behavior: SnackBarBehavior.floating,
-                      ),
-                    );
-                  } finally {
-                    if (mounted) setState(() => _isLoading = false);
-                  }
-                },
-                child: const Text('Seguir como invitado'),
-              ),
-            ],
+                      );
+                    } finally {
+                      if (mounted) setState(() => _isLoading = false);
+                    }
+                  },
+                  child: const Text('Seguir como invitado'),
+                ),
+              ],
+            ),
           ),
         ),
       ),

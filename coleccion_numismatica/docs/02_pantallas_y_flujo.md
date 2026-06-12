@@ -50,3 +50,17 @@
 - Al elegir "Seguir como invitado" → crea usuario anónimo y navega a ListaMonedas.
 - Al registrar/iniciar sesión con email o Google → vincula cuenta anónima si existe, o crea nueva.
 - Al cerrar sesión → vuelve a PantallaAuth.
+
+## Exportar / Importar colección (desde el perfil)
+
+### Exportar
+- El usuario puede exportar toda su colección a un archivo JSON.
+- El archivo se guarda temporalmente y se comparte mediante el selector nativo del sistema (correo, almacenamiento, mensajería).
+- El nombre del archivo incluye la fecha y hora (ej. `coleccion_1744567890123.json`).
+
+### Importar
+- El usuario puede seleccionar un archivo JSON previamente exportado.
+- Se muestran dos opciones:
+  - **Reemplazar**: elimina la colección actual y la sustituye por la importada.
+  - **Fusionar**: añade solo las monedas que no existan en la colección actual. La duplicación se evita comparando la combinación de `país + denominación + año`.
+- Después de la importación, la lista principal se recarga automáticamente.

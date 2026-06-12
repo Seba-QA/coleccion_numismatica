@@ -57,6 +57,10 @@
 - **Fecha**: 11/06/2026
 - **Motivo**: Mejorar la experiencia de usuario permitiendo localizar rápidamente una moneda o billete específico dentro de la colección.
 
+## Decisión: Exportar e importar datos (JSON) con opción de fusión
+- **Fecha**: 12/06/2026
+- **Motivo**: Permitir al usuario realizar respaldos manuales, compartir su colección o restaurar datos sin depender exclusivamente de la nube.
+
 Ahora que el login y perfil están funcionando, el usuario puede registrarse y vincular su cuenta anónima. Esto completa una de las tareas más importantes. Vamos a actualizar la documentación y luego definir los próximos pasos.
 
 ## Problemas resueltos
@@ -73,11 +77,13 @@ Ahora que el login y perfil están funcionando, el usuario puede registrarse y v
 11. `Bad state: No element` en perfil para usuarios anónimos → verificar que `providerData` no esté vacío antes de acceder a `.first`.
 12. Inconsistencia de nombres entre español e inglés → estandarizar nombres (se optó por mantener español en la app, pero los métodos internos pueden ser en inglés para compatibilidad; se ajustó `pantalla_perfil.dart` para usar `signOut` e `isLinking` según la implementación real).
 13. Pantalla negra post-login (solución con `Navigator.pushReplacement`), `Bad state: No element` en perfil (verificación segura de `providerData`).
+14. Al fusionar, se evitan duplicados gracias a la clave compuesta.
+15. La importación no bloquea la UI (se usa `CircularProgressIndicator`).
 
 ## Pendientes para próxima sesión
 - Verificar que las fotos copiadas al directorio permanente no se pierdan al cerrar/abrir la app✅
-- Login con email/Google para compartir colección entre dispositivos
-- Búsqueda y filtros (país, año, tipo, denominación)
+- Login con email/Google para compartir colección entre dispositivos✅
+- Búsqueda y filtros (país, año, tipo, denominación)✅
 - Exportar/importar datos (JSON/CSV)
 - Mejoras visuales (modo oscuro, animaciones)
 - Pruebas en modo release (APK sin conexión al PC)

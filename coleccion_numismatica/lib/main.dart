@@ -105,7 +105,7 @@ class _ListaMonedasState extends State<ListaMonedas> {
     _searchController.dispose();
     super.dispose();
   }
-  
+
   void _applyFilters() {
     List<Map<String, String>> resultado = List.from(_monedas);
 
@@ -196,7 +196,16 @@ class _ListaMonedasState extends State<ListaMonedas> {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const PantallaPerfil()),
+                MaterialPageRoute(
+                  builder:
+                      (context) => PantallaPerfil(
+                        monedas: _monedas, // lista actual
+                        onDatosCambiados: () async {
+                          // callback para recargar datos
+                          await _cargarMonedas();
+                        },
+                      ),
+                ),
               );
             },
           ),
