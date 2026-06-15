@@ -64,3 +64,16 @@
   - **Reemplazar**: elimina la colección actual y la sustituye por la importada.
   - **Fusionar**: añade solo las monedas que no existan en la colección actual. La duplicación se evita comparando la combinación de `país + denominación + año`.
 - Después de la importación, la lista principal se recarga automáticamente.
+
+## Filtros avanzados en la lista principal
+
+- **Rango de años**: permite filtrar por año mínimo (desde) y máximo (hasta). Los campos son numéricos y opcionales.
+- **Composición (texto libre)**: filtro que busca coincidencias parciales (insensible a mayúsculas) en el campo `composicion` de las monedas. Solo afecta a monedas (los billetes se excluyen automáticamente).
+- **Botón "Limpiar filtros"**: restablece todos los filtros avanzados (años y composición) sin afectar la búsqueda por texto ni el filtro por tipo.
+- Todos los filtros se combinan de forma AND (la lista muestra solo los elementos que cumplen todas las condiciones activas).
+
+### Comportamiento de los filtros
+- Los filtros se aplican en tiempo real al escribir o cambiar valores.
+- El filtro de composición es de texto libre, permitiendo buscar términos como "oro", "plata", "billón", "cuproníquel", etc.
+- Si el campo de búsqueda principal está vacío, no filtra por texto.
+- Los filtros de rango de años ignoran valores no numéricos o vacíos.

@@ -61,6 +61,15 @@
 - **Fecha**: 12/06/2026
 - **Motivo**: Permitir al usuario realizar respaldos manuales, compartir su colección o restaurar datos sin depender exclusivamente de la nube.
 
+## Decisión: Implementar filtros avanzados (rango de años y composición libre)
+- **Fecha**: 15/06/2026
+- **Motivo**: Mejorar la búsqueda de monedas por criterios numismáticos específicos (años y material).
+
+## Decisión: Unificar el filtro de composición como texto libre
+- **Fecha**: 15/06/2026
+- **Motivo**: La colección numismática puede tener composiciones muy variadas (aleaciones, descripciones específicas) que no se adaptan a una lista predefinida.
+
+
 Ahora que el login y perfil están funcionando, el usuario puede registrarse y vincular su cuenta anónima. Esto completa una de las tareas más importantes. Vamos a actualizar la documentación y luego definir los próximos pasos.
 
 ## Problemas resueltos
@@ -79,11 +88,14 @@ Ahora que el login y perfil están funcionando, el usuario puede registrarse y v
 13. Pantalla negra post-login (solución con `Navigator.pushReplacement`), `Bad state: No element` en perfil (verificación segura de `providerData`).
 14. Al fusionar, se evitan duplicados gracias a la clave compuesta.
 15. La importación no bloquea la UI (se usa `CircularProgressIndicator`).
+16. - Inicialmente se intentó un `DropdownButton` fijo, pero se descartó por no ser práctico (composiciones variables). Se optó por texto libre.
+17. Conflictos de nulabilidad en `_composicionQuery` resueltos usando `String` no nullable con valor inicial vacío.
+18. Se eliminó código redundante que mezclaba `DropdownButton` con `TextField`.
 
 ## Pendientes para próxima sesión
 - Verificar que las fotos copiadas al directorio permanente no se pierdan al cerrar/abrir la app✅
 - Login con email/Google para compartir colección entre dispositivos✅
 - Búsqueda y filtros (país, año, tipo, denominación)✅
-- Exportar/importar datos (JSON/CSV)
+- Exportar/importar datos (JSON/CSV)✅
 - Mejoras visuales (modo oscuro, animaciones)
-- Pruebas en modo release (APK sin conexión al PC)
+- Pruebas en modo release (APK sin conexión al PC)✅

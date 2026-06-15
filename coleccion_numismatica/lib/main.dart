@@ -83,12 +83,19 @@ class _ListaMonedasState extends State<ListaMonedas> {
   List<Map<String, String>> _filteredMonedas = [];
   String _searchQuery = '';
   String? _filterTipo;
+  int? _anioDesde; // null = sin límite inferior
+  int? _anioHasta; // null = sin límite superior
+  String _composicionQuery = '';
 
   final TextEditingController _paisController = TextEditingController();
   final TextEditingController _anioController = TextEditingController();
   final TextEditingController _denominacionController = TextEditingController();
   final TextEditingController _cantidadController = TextEditingController();
   final TextEditingController _searchController = TextEditingController();
+  final TextEditingController _anioDesdeController = TextEditingController();
+  final TextEditingController _anioHastaController = TextEditingController();
+  final TextEditingController _composicionQueryController =
+      TextEditingController();
 
   @override
   void initState() {
@@ -103,6 +110,9 @@ class _ListaMonedasState extends State<ListaMonedas> {
     _denominacionController.dispose();
     _cantidadController.dispose();
     _searchController.dispose();
+    _anioDesdeController.dispose();
+    _anioHastaController.dispose();
+    _composicionQueryController.dispose();
     super.dispose();
   }
 
@@ -124,6 +134,33 @@ class _ListaMonedasState extends State<ListaMonedas> {
     if (_filterTipo != null) {
       resultado =
           resultado.where((moneda) => moneda['tipo'] == _filterTipo).toList();
+    }
+
+    // 3. Filtro por rango de años
+    if (_anioDesde != null) {
+      resultado =
+          resultado.where((moneda) {
+            final anio = int.tryParse(moneda['anio'] ?? '');
+            return anio != null && anio >= _anioDesde!;
+          }).toList();
+    }
+    if (_anioHasta != null) {
+      resultado =
+          resultado.where((moneda) {
+            final anio = int.tryParse(moneda['anio'] ?? '');
+            return anio != null && anio <= _anioHasta!;
+          }).toList();
+    }
+
+    // 4. Filtro por texto en composición (solo monedas)
+    if (_composicionQuery.isNotEmpty) {
+      final query = _composicionQuery.toLowerCase();
+      resultado =
+          resultado.where((moneda) {
+            if (moneda['tipo'] != 'moneda') return false;
+            final comp = moneda['composicion']?.toLowerCase() ?? '';
+            return comp.contains(query);
+          }).toList();
     }
 
     setState(() {
@@ -284,6 +321,108 @@ class _ListaMonedasState extends State<ListaMonedas> {
                   ),
                 ],
               ),
+            ),
+            // Filtros avanzados (ExpansionTile)
+            ExpansionTile(
+              title: const Text('Filtros avanzados'),
+              children: [
+                // Fila de años: desde y hasta
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: _anioDesdeController,
+                          decoration: const InputDecoration(
+                            labelText: 'Año desde',
+                            border: OutlineInputBorder(),
+                          ),
+                          keyboardType: TextInputType.number,
+                          onChanged: (value) {
+                            _anioDesde =
+                                value.isEmpty ? null : int.tryParse(value);
+                            _applyFilters();
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: TextField(
+                          controller: _anioHastaController,
+                          decoration: const InputDecoration(
+                            labelText: 'Año hasta',
+                            border: OutlineInputBorder(),
+                          ),
+                          keyboardType: TextInputType.number,
+                          onChanged: (value) {
+                            _anioHasta =
+                                value.isEmpty ? null : int.tryParse(value);
+                            _applyFilters();
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                // Campo de composición (texto libre)
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  child: TextField(
+                    controller: _composicionQueryController,
+                    decoration: InputDecoration(
+                      labelText: 'Composición (ej: oro, plata, bronce)',
+                      border: const OutlineInputBorder(),
+                      suffixIcon:
+                          _composicionQuery.isNotEmpty
+                              ? IconButton(
+                                icon: const Icon(Icons.clear),
+                                onPressed: () {
+                                  setState(() {
+                                    _composicionQuery = '';
+                                    _composicionQueryController.clear();
+                                  });
+                                  _applyFilters();
+                                },
+                              )
+                              : null,
+                    ),
+                    onChanged: (value) {
+                      setState(() {
+                        _composicionQuery = value ?? '';
+                      });
+                      _applyFilters();
+                    },
+                  ),
+                ),
+                // Botón para limpiar todos los filtros
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  child: ElevatedButton(
+                    onPressed: () {
+                      _anioDesdeController.clear();
+                      _anioHastaController.clear();
+                      _composicionQueryController.clear();
+                      setState(() {
+                        _anioDesde = null;
+                        _anioHasta = null;
+                        _composicionQuery = '';
+                      });
+                      _applyFilters();
+                    },
+                    child: const Text('Limpiar filtros'),
+                  ),
+                ),
+              ],
             ),
             // Lista de resultados filtrados
             Expanded(
