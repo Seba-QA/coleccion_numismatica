@@ -81,9 +81,17 @@
 - **Fecha**: 16/06/2026
 - **Motivo**: Facilitar la navegación entre la lista de monedas y el perfil de usuario, además de preparar la app para futuras secciones como estadísticas o catálogo.
 
+## Decisión: Rediseñar formularios de agregar/editar moneda
+- **Fecha**: 16/06/2026
+- **Motivo**: Alinear los formularios con el diseño de Figma, mejorar la usabilidad y la estética.
+
 ## Decisión: Rediseñar la tarjeta de moneda en la lista
 - **Fecha**: 16/06/2026
 - **Motivo**: Mejorar la claridad visual y alinearse con el diseño de Figma.
+
+## Decisión: Selectores de imagen circulares para monedas
+- **Fecha**: 16/06/2026
+- **Motivo**: Mejorar la identidad visual de monedas y billetes.
 
 Ahora que el login y perfil están funcionando, el usuario puede registrarse y vincular su cuenta anónima. Esto completa una de las tareas más importantes. Vamos a actualizar la documentación y luego definir los próximos pasos.
 

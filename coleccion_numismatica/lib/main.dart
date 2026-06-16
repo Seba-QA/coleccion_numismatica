@@ -182,6 +182,33 @@ class _ListaMonedasState extends State<ListaMonedas> {
   int? _anioDesde; // null = sin límite inferior
   int? _anioHasta; // null = sin límite superior
   String _composicionQuery = '';
+  String? _validarCampoObligatorio(String? value, String nombreCampo) {
+    if (value == null || value.isEmpty) {
+      return 'El campo $nombreCampo es obligatorio';
+    }
+    return null;
+  }
+
+  String? _validarNumeroEntero(String? value, String nombreCampo) {
+    if (value == null || value.isEmpty) {
+      return 'El campo $nombreCampo es obligatorio';
+    }
+    if (int.tryParse(value) == null) {
+      return 'Ingresa un número válido';
+    }
+    return null;
+  }
+
+  String? _validarCantidad(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'La cantidad es obligatoria';
+    }
+    final cantidad = int.tryParse(value);
+    if (cantidad == null || cantidad <= 0) {
+      return 'Ingresa una cantidad mayor a 0';
+    }
+    return null;
+  }
 
   final TextEditingController _paisController = TextEditingController();
   final TextEditingController _anioController = TextEditingController();
@@ -192,6 +219,7 @@ class _ListaMonedasState extends State<ListaMonedas> {
   final TextEditingController _anioHastaController = TextEditingController();
   final TextEditingController _composicionQueryController =
       TextEditingController();
+  final _formKey = GlobalKey<FormState>();
 
   @override
   void initState() {
@@ -512,91 +540,120 @@ class _ListaMonedasState extends State<ListaMonedas> {
                         itemBuilder: (context, index) {
                           final moneda = _filteredMonedas[index];
                           final esMoneda = moneda['tipo'] == 'moneda';
-                          return Card(
-                            margin: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 8,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            elevation: 2,
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
+                          return GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder:
+                                      (context) =>
+                                          DetalleMoneda(moneda: moneda),
+                                ),
+                              );
+                            },
+                            child: Card(
+                              margin: const EdgeInsets.symmetric(
+                                horizontal: 16,
                                 vertical: 8,
-                                horizontal: 12,
                               ),
-                              child: Row(
-                                children: [
-                                  // Icono izquierdo (moneda/billete)
-                                  Container(
-                                    width: 40,
-                                    height: 40,
-                                    decoration: BoxDecoration(
-                                      color: Colors.amber.withOpacity(0.2),
-                                      shape: BoxShape.circle,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              elevation: 2,
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 8,
+                                  horizontal: 12,
+                                ),
+                                child: Row(
+                                  children: [
+                                    // Icono izquierdo (moneda/billete)
+                                    Container(
+                                      width: 40,
+                                      height: 40,
+                                      decoration: BoxDecoration(
+                                        color: Colors.amber.withOpacity(0.2),
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: Icon(
+                                        esMoneda
+                                            ? Icons.monetization_on
+                                            : Icons.attach_money,
+                                        color: const Color(0xFFC9A03D),
+                                      ),
                                     ),
-                                    child: Icon(
-                                      esMoneda
-                                          ? Icons.monetization_on
-                                          : Icons.attach_money,
-                                      color: const Color(0xFFC9A03D), // dorado
+                                    const SizedBox(width: 12),
+                                    // Texto: denominación + país/año
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            moneda['denominacion']!,
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 18,
+                                            ),
+                                          ),
+                                          Text(
+                                            '${moneda['pais']} - año ${moneda['anio']}',
+                                            style: TextStyle(
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .onSurface
+                                                  .withOpacity(0.7),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
                                     ),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  // Texto: denominación + país/año
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
+                                    // Botones de editar y eliminar
+                                    Row(
+                                      mainAxisSize: MainAxisSize.min,
                                       children: [
-                                        Text(
-                                          moneda['denominacion']!,
-                                          style: const TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 18,
+                                        IconButton(
+                                          icon: const Icon(
+                                            Icons.edit,
+                                            color: Colors.blue,
                                           ),
+                                          onPressed: () {
+                                            _mostrarFormulario(
+                                              indice: index,
+                                              monedaEditada: moneda,
+                                            );
+                                          },
                                         ),
-                                        Text(
-                                          '${moneda['pais']} - año ${moneda['anio']}',
-                                          style: TextStyle(
-                                            color: Theme.of(context)
-                                                .colorScheme
-                                                .onSurface
-                                                .withOpacity(0.7),
+                                        IconButton(
+                                          icon: const Icon(
+                                            Icons.delete,
+                                            color: Colors.red,
                                           ),
+                                          onPressed: () async {
+                                            final monedaAEliminar =
+                                                _filteredMonedas[index];
+                                            final user =
+                                                FirebaseAuth
+                                                    .instance
+                                                    .currentUser;
+                                            if (user != null &&
+                                                monedaAEliminar.containsKey(
+                                                  '_id',
+                                                )) {
+                                              await FirebaseFirestore.instance
+                                                  .collection('usuarios')
+                                                  .doc(user.uid)
+                                                  .collection('monedas')
+                                                  .doc(monedaAEliminar['_id'])
+                                                  .delete();
+                                            }
+                                            await _cargarMonedas(); // Recarga y aplica filtros
+                                          },
                                         ),
                                       ],
                                     ),
-                                  ),
-                                  // Botones de editar y eliminar
-                                  Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      IconButton(
-                                        icon: const Icon(
-                                          Icons.edit,
-                                          color: Colors.blue,
-                                        ),
-                                        onPressed: () {
-                                          _mostrarFormulario(
-                                            indice: index,
-                                            monedaEditada: moneda,
-                                          );
-                                        },
-                                      ),
-                                      IconButton(
-                                        icon: const Icon(
-                                          Icons.delete,
-                                          color: Colors.red,
-                                        ),
-                                        onPressed: () async {
-                                          // ... lógica de eliminación (la misma que tenías)
-                                        },
-                                      ),
-                                    ],
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
                             ),
                           );
@@ -640,68 +697,101 @@ class _ListaMonedasState extends State<ListaMonedas> {
         return StatefulBuilder(
           builder: (context, setStateDialog) {
             return AlertDialog(
-              title: const Text('Datos obligatorios'),
+              title: const Text('Nueva pieza'),
               content: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: RadioListTile(
-                            title: const Text('Moneda'),
-                            value: 'moneda',
-                            groupValue: tipoLocal,
-                            onChanged: (value) {
-                              setStateDialog(() {
-                                tipoLocal = value!;
-                                _tipoSeleccionado = value;
-                              });
-                            },
-                          ),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Text(
+                        'TIPO DE PIEZA',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
                         ),
-                        Expanded(
-                          child: RadioListTile(
-                            title: const Text('Billete'),
+                      ),
+                      const SizedBox(height: 8),
+                      SegmentedButton<String>(
+                        segments: const [
+                          ButtonSegment(value: 'moneda', label: Text('Moneda')),
+                          ButtonSegment(
                             value: 'billete',
-                            groupValue: tipoLocal,
-                            onChanged: (value) {
-                              setStateDialog(() {
-                                tipoLocal = value!;
-                                _tipoSeleccionado = value;
-                              });
-                            },
+                            label: Text('Billete'),
                           ),
+                        ],
+                        selected: {tipoLocal},
+                        onSelectionChanged: (Set<String> selection) {
+                          setStateDialog(() {
+                            tipoLocal = selection.first;
+                            _tipoSeleccionado = selection.first;
+                          });
+                        },
+                        style: ButtonStyle(
+                          backgroundColor: WidgetStateProperty.resolveWith((
+                            states,
+                          ) {
+                            if (states.contains(WidgetState.selected)) {
+                              return Theme.of(context).colorScheme.primary;
+                            }
+                            return Theme.of(context).colorScheme.surface;
+                          }),
+                          foregroundColor: WidgetStateProperty.resolveWith((
+                            states,
+                          ) {
+                            if (states.contains(WidgetState.selected)) {
+                              return Theme.of(context).colorScheme.onPrimary;
+                            }
+                            return Theme.of(context).colorScheme.onSurface;
+                          }),
                         ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    TextField(
-                      controller: _denominacionController,
-                      decoration: const InputDecoration(
-                        labelText: 'Denominación *',
                       ),
-                    ),
-                    const SizedBox(height: 12),
-                    TextField(
-                      controller: _paisController,
-                      decoration: const InputDecoration(labelText: 'País *'),
-                    ),
-                    const SizedBox(height: 12),
-                    TextField(
-                      controller: _anioController,
-                      decoration: const InputDecoration(labelText: 'Año *'),
-                      keyboardType: TextInputType.number,
-                    ),
-                    const SizedBox(height: 12),
-                    TextField(
-                      controller: _cantidadController,
-                      decoration: const InputDecoration(
-                        labelText: 'Cantidad *',
+                      const SizedBox(height: 16),
+                      TextFormField(
+                        controller: _denominacionController,
+                        decoration: const InputDecoration(
+                          labelText: 'Denominación *',
+                          hintText: 'Ej: 5 Pesos, 1 Real, ½ Crown...',
+                          border: OutlineInputBorder(),
+                        ),
+                        validator:
+                            (value) =>
+                                _validarCampoObligatorio(value, 'denominación'),
                       ),
-                      keyboardType: TextInputType.number,
-                    ),
-                  ],
+                      const SizedBox(height: 12),
+                      TextFormField(
+                        controller: _paisController,
+                        decoration: const InputDecoration(
+                          labelText: 'País *',
+                          hintText: 'Ej: España, México...',
+                          border: OutlineInputBorder(),
+                        ),
+                        validator:
+                            (value) => _validarCampoObligatorio(value, 'país'),
+                      ),
+                      const SizedBox(height: 12),
+                      TextFormField(
+                        controller: _anioController,
+                        decoration: const InputDecoration(
+                          labelText: 'Año *',
+                          hintText: '1957',
+                          border: OutlineInputBorder(),
+                        ),
+                        validator:
+                            (value) => _validarNumeroEntero(value, 'año'),
+                        keyboardType: TextInputType.number,
+                      ),
+                      const SizedBox(height: 12),
+                      TextFormField(
+                        controller: _cantidadController,
+                        decoration: const InputDecoration(
+                          labelText: 'Cantidad *',
+                        ),
+                        validator: (value) => _validarCantidad(value),
+                        keyboardType: TextInputType.number,
+                      ),
+                    ],
+                  ),
                 ),
               ),
               actions: [
@@ -718,10 +808,7 @@ class _ListaMonedasState extends State<ListaMonedas> {
                     Expanded(
                       child: ElevatedButton(
                         onPressed: () {
-                          if (_denominacionController.text.isNotEmpty &&
-                              _paisController.text.isNotEmpty &&
-                              _anioController.text.isNotEmpty &&
-                              _cantidadController.text.isNotEmpty) {
+                          if (_formKey.currentState!.validate()) {
                             final datosObligatorios = {
                               'denominacion': _denominacionController.text,
                               'pais': _paisController.text,
@@ -737,7 +824,7 @@ class _ListaMonedasState extends State<ListaMonedas> {
                             );
                           }
                         },
-                        child: const Text('Siguiente →'),
+                        child: const Text('Continuar'),
                       ),
                     ),
                   ],

@@ -52,64 +52,120 @@ class _FormularioOpcionalState extends State<FormularioOpcional> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Datos opcionales'),
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Datos opcionales',
+            ),
+            Text(
+              'Puedes completarlo más adelante',
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey,
+              ),
+            ),
+          ]
+        ),
+        //const Text('Datos opcionales')
       ),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(16),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SelectorImagen(
-                titulo: 'Foto anverso',
-                tipo: tipo,
-                rutaImagenActual: _rutaAnverso,
-                onImagenSeleccionada: (ruta) {
-                  setState(() {
-                    _rutaAnverso = ruta;
-                  });
-                },
-              ),
-              const SizedBox(height: 16),
-              SelectorImagen(
-                titulo: 'Foto reverso',
-                tipo: tipo,
-                rutaImagenActual: _rutaReverso,
-                onImagenSeleccionada: (ruta) {
-                  setState(() {
-                    _rutaReverso = ruta;
-                  });
-                },
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: SelectorImagen(
+                      titulo: 'Foto anverso',
+                      tipo: tipo,
+                      rutaImagenActual: _rutaAnverso,
+                      onImagenSeleccionada: (ruta) {
+                        setState(() {
+                          _rutaAnverso = ruta;
+                        });
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: SelectorImagen(
+                      titulo: 'Foto reverso',
+                      tipo: tipo,
+                      rutaImagenActual: _rutaReverso,
+                      onImagenSeleccionada: (ruta) {
+                        setState(() {
+                          _rutaReverso = ruta;
+                        });
+                      },
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: 16),
               // Campos específicos para moneda
               if (esMoneda) ...[
+                const Text(
+                  'Composición',
+                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                ),
                 TextField(
                   controller: _composicionController,
                   decoration: const InputDecoration(
-                    labelText: 'Composición',
                     hintText: 'Ej: Oro, Plata, Bronce',
                     border: OutlineInputBorder(),
                   ),
                 ),
                 const SizedBox(height: 16),
-                TextField(
-                  controller: _pesoController,
-                  decoration: const InputDecoration(
-                    labelText: 'Peso (g)',
-                    hintText: 'Ej: 12.5',
-                    border: OutlineInputBorder(),
-                  ),
-                  keyboardType: TextInputType.number,
-                ),
-                const SizedBox(height: 16),
-                TextField(
-                  controller: _diametroController,
-                  decoration: const InputDecoration(
-                    labelText: 'Diámetro (mm)',
-                    hintText: 'Ej: 23',
-                    border: OutlineInputBorder(),
-                  ),
-                  keyboardType: TextInputType.number,
+                Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Peso (g)',
+                            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                          ),
+                          const SizedBox(height: 4),
+                          TextField(
+                            controller: _pesoController,
+                            decoration: const InputDecoration(
+                              hintText: 'Ej: 18.05',
+                              border: OutlineInputBorder(),
+                              suffixText: 'g',  // ← fijo
+                            ),
+                            keyboardType: TextInputType.number,
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Diámetro (mm)',
+                            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                          ),
+                          const SizedBox(height: 4),
+                          TextField(
+                            controller: _diametroController,
+                            decoration: const InputDecoration(
+                              hintText: 'Ej: 34.5',
+                              border: OutlineInputBorder(),
+                              suffixText: 'mm', // ← fijo
+                            ),
+                            keyboardType: TextInputType.number,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ] else ...[
                 // Campos específicos para billete
@@ -128,19 +184,25 @@ class _FormularioOpcionalState extends State<FormularioOpcional> {
                 ),
               ],
               const SizedBox(height: 16),
+              const Text(
+                'Año gregoriano',
+                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+              ),
               TextField(
                 controller: _anioGregorianoController,
                 decoration: const InputDecoration(
-                  labelText: 'Año gregoriano',
                   hintText: 'Si es moneda antigua',
                   border: OutlineInputBorder(),
                 ),
               ),
               const SizedBox(height: 16),
+              const Text(
+                'Marca de ceca',
+                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+              ),
               TextField(
                 controller: _marcaCecaController,
                 decoration: const InputDecoration(
-                  labelText: 'Marca de ceca',
                   hintText: 'Ej: Mo, S, So',
                   border: OutlineInputBorder(),
                 ),
@@ -152,7 +214,7 @@ class _FormularioOpcionalState extends State<FormularioOpcional> {
                   minimumSize: const Size(double.infinity, 50),
                 ),
                 child: Text(
-                  'GUARDAR ${esMoneda ? 'MONEDA' : 'BILLETE'} COMPLETO',
+                  'GUARDAR ${esMoneda ? 'MONEDA' : 'BILLETE'}',
                 ),
               ),
             ],

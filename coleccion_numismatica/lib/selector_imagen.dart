@@ -82,31 +82,47 @@ class SelectorImagen extends StatelessWidget {
             width: tipo == 'moneda' ? 150 : double.infinity,
             decoration: BoxDecoration(
               border: Border.all(color: Color(0xFF1A2A4A)),
-              borderRadius: BorderRadius.circular(8),
+              shape: tipo == 'moneda' ? BoxShape.circle : BoxShape.rectangle,
+              borderRadius: tipo == 'moneda' ? null : BorderRadius.circular(8),
             ),
             child:
                 rutaImagenActual != null && rutaImagenActual!.isNotEmpty
-                    ? ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: Image.file(
-                        File(rutaImagenActual!),
-                        fit: BoxFit.cover,
-                        width: tipo == 'moneda' ? 150 : double.infinity,
-                        height: tipo == 'moneda' ? 150 : 100,
-                      ),
-                    )
-                    : Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Icon(
-                            Icons.add_photo_alternate,
-                            size: 40,
-                            color: Colors.grey,
+                    ? (tipo == 'moneda'
+                        ? ClipOval(
+                          child: Image.file(
+                            File(rutaImagenActual!),
+                            fit: BoxFit.cover,
+                            width: tipo == 'moneda' ? 150 : double.infinity,
+                            height: tipo == 'moneda' ? 150 : 100,
                           ),
-                          const SizedBox(height: 8),
-                          Text('Tocar para agregar $titulo'),
-                        ],
+                        )
+                        : ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: Image.file(
+                            File(rutaImagenActual!),
+                            fit: BoxFit.cover,
+                            width: double.infinity,
+                            height: 100,
+                          ),
+                        ))
+                    : Center(
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.add_photo_alternate,
+                              size: 30,
+                              color: Colors.grey,
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Tocar para agregar',
+                              style: const TextStyle(fontSize: 12),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
           ),

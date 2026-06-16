@@ -105,3 +105,30 @@
   - Denominación en negrita grande.
   - País y año en la misma línea debajo.
   - Botones de editar (azul) y eliminar (rojo) a la derecha.
+
+  ## Formulario de datos obligatorios (diálogo)
+- **Título**: "Nueva pieza".
+- **Selector de tipo**: `SegmentedButton` con opciones "Moneda" y "Billete" (estilo moderno, color primario al seleccionar).
+- **Campos**:
+  - Denominación (hint: "Ej: 5 Pesos, 1 Real, ½ Crown...").
+  - País (hint: "México").
+  - Año (hint: "1957").
+  - Cantidad (hint: "1").
+- **Validaciones**:
+  - Todos los campos son obligatorios.
+  - Año y cantidad deben ser números válidos.
+  - Mensajes de error se muestran debajo de cada campo.
+- **Botones**: "Cancelar" (texto) y "Continuar →" (primario) en la misma fila.
+
+## Formulario de datos opcionales (pantalla completa)
+- **Subtítulo**: "Puedes completarlo más adelante".
+- **Sección FOTOGRAFÍAS**:
+  - Selectores de foto "Anverso" y "Reverso" en fila.
+  - Para **monedas**, los selectores son circulares (círculo).
+  - Para **billetes**, los selectores son rectangulares con bordes redondeados.
+  - Dentro del selector: icono y texto "Tocar para agregar" (con `FittedBox` para evitar desbordes).
+- **Sección CARACTERÍSTICAS FÍSICAS**:
+  - Campo "Composición" con hint "Ej: Plata .720, Cobre, Cuproníquel...".
+  - Campos "Peso (g)" y "Diámetro (mm)" en la misma fila, cada uno con sufijo fijo ("g" y "mm") dentro del campo.
+- **Botón**: "Guardar pieza" (primario, ancho completo).
+- **Nota**: No incluye sección de "Información adicional" (se omite por ahora).
