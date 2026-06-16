@@ -10,13 +10,13 @@ import 'servicio_auth.dart';
 import 'pantalla_auth.dart';
 
 class PantallaPerfil extends StatefulWidget {
-  final List<Map<String, String>> monedas;
-  final VoidCallback onDatosCambiados;
+  final List<Map<String, String>>? monedas;
+  final VoidCallback? onDatosCambiados;
 
   const PantallaPerfil({
     super.key,
-    required this.monedas,
-    required this.onDatosCambiados,
+    this.monedas,
+    this.onDatosCambiados,
   });
 
   @override
@@ -49,6 +49,24 @@ class _PantallaPerfilState extends State<PantallaPerfil> {
         const SnackBar(content: Text('Error al exportar los datos')),
       );
     }
+  }
+
+  Future<List<Map<String, String>>> _obtenerMonedasDeFirestore() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return [];
+    final snapshot = await FirebaseFirestore.instance
+        .collection('usuarios')
+        .doc(user.uid)
+        .collection('monedas')
+        .get();
+    final List<Map<String, String>> lista = [];
+    for (var doc in snapshot.docs) {
+      final data = doc.data() as Map<String, dynamic>;
+      final moneda = Map<String, String>.from(data);
+      moneda['_id'] = doc.id;
+      lista.add(moneda);
+    }
+    return lista;
   }
 
   Future<void> _importarDatos() async {
@@ -139,7 +157,9 @@ class _PantallaPerfilState extends State<PantallaPerfil> {
       Navigator.pop(context); // cierra el diálogo de progreso
 
       // Recargar los datos en la pantalla principal
-      widget.onDatosCambiados();
+      if (widget.onDatosCambiados != null) {
+        widget.onDatosCambiados!();
+      }
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Importación completada con éxito')),
@@ -184,9 +204,6 @@ class _PantallaPerfilState extends State<PantallaPerfil> {
     final esAnonimo = _user.isAnonymous;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Mi Perfil'),
-      ),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(

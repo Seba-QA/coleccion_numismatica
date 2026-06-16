@@ -77,6 +77,13 @@
 - **Fecha**: 15/06/2026
 - **Motivo**: Mejorar la usabilidad y la estética, evitando que los botones queden uno encima del otro.
 
+# Decisión: Implementar menú inferior (BottomNavigationBar) con pestañas Colección y Perfil
+- **Fecha**: 16/06/2026
+- **Motivo**: Facilitar la navegación entre la lista de monedas y el perfil de usuario, además de preparar la app para futuras secciones como estadísticas o catálogo.
+
+## Decisión: Rediseñar la tarjeta de moneda en la lista
+- **Fecha**: 16/06/2026
+- **Motivo**: Mejorar la claridad visual y alinearse con el diseño de Figma.
 
 Ahora que el login y perfil están funcionando, el usuario puede registrarse y vincular su cuenta anónima. Esto completa una de las tareas más importantes. Vamos a actualizar la documentación y luego definir los próximos pasos.
 
@@ -108,5 +115,5 @@ Ahora que el login y perfil están funcionando, el usuario puede registrarse y v
 - Exportar/importar datos (JSON/CSV)✅
 - Mejoras visuales (modo oscuro, animaciones)✅
 - Pruebas en modo release (APK sin conexión al PC)✅
-- Mejora interfaz de las distintas pantallas
+- Mejora interfaz de las distintas pantallas⌚
 - Creacion de estadisticas

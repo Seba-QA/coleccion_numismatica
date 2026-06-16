@@ -85,3 +85,23 @@
   - Secundario: `#C9A03D` (dorado)
   - Error: `#C53030` (rojo ladrillo)
 - Todos los widgets (botones, campos de texto, tarjetas, AppBar) heredan estilos del tema global, eliminando estilos inline para mantener consistencia.
+
+## Navegación inferior (BottomNavigationBar)
+
+- La app utiliza un menú inferior con dos pestañas principales:
+  - **Mi Colección**: muestra la lista de monedas (pantalla principal).
+  - **Perfil**: muestra la pantalla de perfil del usuario.
+- El menú inferior está visible cuando el usuario está autenticado (incluyendo modo invitado).
+- Al cambiar de pestaña, el `AppBar` superior actualiza su título dinámicamente ("Mi Colección" o "Mi Perfil").
+- No se incluyen iconos de perfil en el `AppBar` de la lista, ya que el acceso al perfil es desde el menú inferior.
+
+## Pantalla de lista de monedas (diseño actual)
+
+- **Campo de búsqueda**: con hint "Buscar por denominación, país o año".
+- **Filtros tipo**: chips "Todos", "Monedas", "Billetes" con estilo moderno
+- **Filtros avanzados**: dentro de `ExpansionTile` (rango de años, composición).
+- **Tarjetas**: cada moneda se muestra en una tarjeta con:
+  - Icono circular (dorado) a la izquierda.
+  - Denominación en negrita grande.
+  - País y año en la misma línea debajo.
+  - Botones de editar (azul) y eliminar (rojo) a la derecha.
