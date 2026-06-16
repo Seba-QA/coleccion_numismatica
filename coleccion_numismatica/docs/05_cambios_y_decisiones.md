@@ -69,6 +69,14 @@
 - **Fecha**: 15/06/2026
 - **Motivo**: La colección numismática puede tener composiciones muy variadas (aleaciones, descripciones específicas) que no se adaptan a una lista predefinida.
 
+## Decisión: Implementar tema global con `ThemeData`
+- **Fecha**: 15/06/2026
+- **Motivo**: Centralizar la apariencia de la app (colores, tipografía, bordes) y facilitar el mantenimiento, además de permitir modo claro/oscuro.
+
+## Decisión: Alinear botones del diálogo de datos obligatorios horizontalmente
+- **Fecha**: 15/06/2026
+- **Motivo**: Mejorar la usabilidad y la estética, evitando que los botones queden uno encima del otro.
+
 
 Ahora que el login y perfil están funcionando, el usuario puede registrarse y vincular su cuenta anónima. Esto completa una de las tareas más importantes. Vamos a actualizar la documentación y luego definir los próximos pasos.
 
@@ -91,11 +99,14 @@ Ahora que el login y perfil están funcionando, el usuario puede registrarse y v
 16. - Inicialmente se intentó un `DropdownButton` fijo, pero se descartó por no ser práctico (composiciones variables). Se optó por texto libre.
 17. Conflictos de nulabilidad en `_composicionQuery` resueltos usando `String` no nullable con valor inicial vacío.
 18. Se eliminó código redundante que mezclaba `DropdownButton` con `TextField`.
+19. Tras la limpieza de estilos inline, se perdió el borde visual que indicaba el área del selector. Se restauró en `selector_imagen.dart` con `BoxDecoration(border: Border.all(color: Colors.grey), borderRadius: BorderRadius.circular(8))`.
 
 ## Pendientes para próxima sesión
 - Verificar que las fotos copiadas al directorio permanente no se pierdan al cerrar/abrir la app✅
 - Login con email/Google para compartir colección entre dispositivos✅
 - Búsqueda y filtros (país, año, tipo, denominación)✅
 - Exportar/importar datos (JSON/CSV)✅
-- Mejoras visuales (modo oscuro, animaciones)
+- Mejoras visuales (modo oscuro, animaciones)✅
 - Pruebas en modo release (APK sin conexión al PC)✅
+- Mejora interfaz de las distintas pantallas
+- Creacion de estadisticas

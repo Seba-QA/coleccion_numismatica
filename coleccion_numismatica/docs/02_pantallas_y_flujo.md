@@ -77,3 +77,11 @@
 - El filtro de composición es de texto libre, permitiendo buscar términos como "oro", "plata", "billón", "cuproníquel", etc.
 - Si el campo de búsqueda principal está vacío, no filtra por texto.
 - Los filtros de rango de años ignoran valores no numéricos o vacíos.
+
+## Tema visual (claro/oscuro)
+- La app soporta modo claro y oscuro, siguiendo la configuración del sistema operativo.
+- Los colores principales están definidos en `ThemeData` en `main.dart`:
+  - Primario: `#1A2A4A` (azul marino)
+  - Secundario: `#C9A03D` (dorado)
+  - Error: `#C53030` (rojo ladrillo)
+- Todos los widgets (botones, campos de texto, tarjetas, AppBar) heredan estilos del tema global, eliminando estilos inline para mantener consistencia.

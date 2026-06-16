@@ -13,8 +13,6 @@ class DetalleMoneda extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(moneda['denominacion'] ?? 'Detalle'),
-        backgroundColor: Colors.blue,
-        foregroundColor: Colors.white,
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -64,7 +62,6 @@ class DetalleMoneda extends StatelessWidget {
           style: const TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
-            color: Colors.blue,
           ),
         ),
         const SizedBox(height: 12),

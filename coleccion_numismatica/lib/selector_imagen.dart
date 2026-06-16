@@ -54,8 +54,6 @@ class SelectorImagen extends StatelessWidget {
       uiSettings: [
         AndroidUiSettings(
           toolbarTitle: 'Ajustar imagen',
-          toolbarColor: Colors.blue,
-          toolbarWidgetColor: Colors.white,
           initAspectRatio: CropAspectRatioPreset.original,
           lockAspectRatio: true,
           hideBottomControls: false,
@@ -83,7 +81,7 @@ class SelectorImagen extends StatelessWidget {
             height: tipo == 'moneda' ? 150 : 100,
             width: tipo == 'moneda' ? 150 : double.infinity,
             decoration: BoxDecoration(
-              border: Border.all(color: Colors.grey),
+              border: Border.all(color: Color(0xFF1A2A4A)),
               borderRadius: BorderRadius.circular(8),
             ),
             child:

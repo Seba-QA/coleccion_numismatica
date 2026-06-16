@@ -14,16 +14,6 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   try {
     await Firebase.initializeApp();
-    // final auth = FirebaseAuth.instance;
-    // User? user = auth.currentUser;
-    // if (user == null) {
-    //   await auth.signInAnonymously();
-    //   print('Usuario anónimo creado: ${auth.currentUser?.uid}');
-    // } else {
-    //   print('Usuario ya existente: ${user.uid}');
-    // }
-    // No creamos usuario anónimo automáticamente.
-    // El usuario deberá tocar "Seguir como invitado" si quiere modo invitado.
     print('Esperando acción del usuario (login o invitado)');
     final appDocumentDir =
         await path_provider.getApplicationDocumentsDirectory();
@@ -38,13 +28,134 @@ void main() async {
 
 class ColeccionNumismaticaApp extends StatelessWidget {
   const ColeccionNumismaticaApp({super.key});
+  // TEMA CLARO
+  static final ThemeData _lightTheme = ThemeData(
+    useMaterial3: true,
+    brightness: Brightness.light,
+    colorScheme: const ColorScheme.light(
+      primary: Color(0xFF1A2A4A),      // azul marino
+      secondary: Color(0xFFC9A03D),    // dorado
+      surface: Colors.white,
+      background: Color(0xFFF8F9FA),
+      error: Color(0xFFC53030),
+      onPrimary: Colors.white,
+      onSecondary: Colors.white,
+      onSurface: Color(0xFF2D3748),
+      onBackground: Color(0xFF2D3748),
+    ),
+    appBarTheme: const AppBarTheme(
+      centerTitle: false,
+      elevation: 0,
+      backgroundColor: Color(0xFF1A2A4A),
+      foregroundColor: Colors.white,
+    ),
+    inputDecorationTheme: InputDecorationTheme(
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      filled: true,
+      fillColor: Colors.white,
+    ),
+    elevatedButtonTheme: ElevatedButtonThemeData(
+      style: ElevatedButton.styleFrom(
+        minimumSize: const Size(double.infinity, 48),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+      ),
+    ),
+    outlinedButtonTheme: OutlinedButtonThemeData(
+      style: OutlinedButton.styleFrom(
+        minimumSize: const Size(double.infinity, 48),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+      ),
+    ),
+    cardTheme: CardTheme(
+      elevation: 2,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+    ),
+    textTheme: const TextTheme(
+      titleLarge: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+      titleMedium: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+      bodyLarge: TextStyle(fontSize: 16),
+      bodyMedium: TextStyle(fontSize: 14),
+      labelLarge: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+    ),
+  );
+
+  // TEMA OSCURO
+  static final ThemeData _darkTheme = ThemeData(
+    useMaterial3: true,
+    brightness: Brightness.dark,
+    colorScheme: const ColorScheme.dark(
+      primary: Color(0xFF1A2A4A),
+      secondary: Color(0xFFC9A03D),
+      surface: Color(0xFF2C2C2C),
+      background: Color(0xFF121212),
+      error: Color(0xFFC53030),
+      onPrimary: Colors.white,
+      onSecondary: Colors.white,
+      onSurface: Colors.white,
+      onBackground: Colors.white,
+    ),
+    appBarTheme: const AppBarTheme(
+      centerTitle: false,
+      elevation: 0,
+      backgroundColor: Color(0xFF1A2A4A),
+      foregroundColor: Colors.white,
+    ),
+    inputDecorationTheme: InputDecorationTheme(
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      filled: true,
+      fillColor: Color(0xFF3A3A3A),
+    ),
+    elevatedButtonTheme: ElevatedButtonThemeData(
+      style: ElevatedButton.styleFrom(
+        minimumSize: const Size(double.infinity, 48),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+      ),
+    ),
+    outlinedButtonTheme: OutlinedButtonThemeData(
+      style: OutlinedButton.styleFrom(
+        minimumSize: const Size(double.infinity, 48),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+      ),
+    ),
+    cardTheme: CardTheme(
+      elevation: 2,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+    ),
+    textTheme: const TextTheme(
+      titleLarge: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+      titleMedium: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+      bodyLarge: TextStyle(fontSize: 16),
+      bodyMedium: TextStyle(fontSize: 14),
+      labelLarge: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+    ),
+  );
 
   @override
   Widget build(BuildContext context) {
     final authService = ServicioAuth();
     return MaterialApp(
       title: 'Colección Numismática',
-      theme: ThemeData(primarySwatch: Colors.blue, useMaterial3: true),
+      theme: _lightTheme,
+      darkTheme: _darkTheme,
+      //themeMode: ThemeMode.system,
+      //themeMode: ThemeMode.dark,
+      themeMode: ThemeMode.light,
       home: StreamBuilder<User?>(
         stream: authService.userChanges,
         builder: (context, snapshot) {
@@ -225,8 +336,6 @@ class _ListaMonedasState extends State<ListaMonedas> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Mi Colección Numismática'),
-        backgroundColor: Colors.blue,
-        foregroundColor: Colors.white,
         actions: [
           IconButton(
             icon: const Icon(Icons.person),
@@ -618,32 +727,42 @@ class _ListaMonedasState extends State<ListaMonedas> {
                 ),
               ),
               actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text('Cancelar'),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    if (_denominacionController.text.isNotEmpty &&
-                        _paisController.text.isNotEmpty &&
-                        _anioController.text.isNotEmpty &&
-                        _cantidadController.text.isNotEmpty) {
-                      final datosObligatorios = {
-                        'denominacion': _denominacionController.text,
-                        'pais': _paisController.text,
-                        'anio': _anioController.text,
-                        'cantidad': _cantidadController.text,
-                        'tipo': tipoLocal,
-                      };
-                      Navigator.pop(context);
-                      _mostrarFormularioOpcional(
-                        datosObligatorios: datosObligatorios,
-                        indice: indice,
-                        monedaEditada: monedaEditada,
-                      );
-                    }
-                  },
-                  child: const Text('Siguiente →'),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text('Cancelar'),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () {
+                          if (_denominacionController.text.isNotEmpty &&
+                              _paisController.text.isNotEmpty &&
+                              _anioController.text.isNotEmpty &&
+                              _cantidadController.text.isNotEmpty) {
+                            final datosObligatorios = {
+                              'denominacion': _denominacionController.text,
+                              'pais': _paisController.text,
+                              'anio': _anioController.text,
+                              'cantidad': _cantidadController.text,
+                              'tipo': tipoLocal,
+                            };
+                            Navigator.pop(context);
+                            _mostrarFormularioOpcional(
+                              datosObligatorios: datosObligatorios,
+                              indice: indice,
+                              monedaEditada: monedaEditada,
+                            );
+                          }
+                        },
+                        child: const Text('Siguiente →'),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             );

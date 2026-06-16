@@ -170,11 +170,7 @@ class _PantallaAuthState extends State<PantallaAuth> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(_isLogin ? 'Iniciar sesión' : 'Registrarse'),
-        backgroundColor: Colors.blue,
-        foregroundColor: Colors.white,
-      ),
+      appBar: AppBar(title: Text(_isLogin ? 'Iniciar sesión' : 'Registrarse')),
       body: Padding(
         padding: const EdgeInsets.all(20),
         child: Form(
@@ -183,6 +179,28 @@ class _PantallaAuthState extends State<PantallaAuth> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
+                // Logo provisional
+                Container(
+                  width: 80,
+                  height: 80,
+                  decoration: BoxDecoration(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.primary.withOpacity(0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Center(
+                    child: Text(
+                      'N',
+                      style: TextStyle(
+                        fontSize: 40,
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
                 SegmentedButton<String>(
                   segments: const [
                     ButtonSegment(
@@ -221,6 +239,18 @@ class _PantallaAuthState extends State<PantallaAuth> {
                       (value) =>
                           value!.length >= 6 ? null : 'Mínimo 6 caracteres',
                 ),
+                if (_isLogin) ...[
+                  const SizedBox(height: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      TextButton(
+                        onPressed: () {},
+                        child: const Text('¿Olvidaste tu contraseña?'),
+                      ),
+                    ],
+                  ),
+                ],
                 if (!_isLogin) ...[
                   const SizedBox(height: 12),
                   TextFormField(

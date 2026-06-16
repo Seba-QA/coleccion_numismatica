@@ -186,8 +186,6 @@ class _PantallaPerfilState extends State<PantallaPerfil> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Mi Perfil'),
-        backgroundColor: Colors.blue,
-        foregroundColor: Colors.white,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
@@ -196,7 +194,6 @@ class _PantallaPerfilState extends State<PantallaPerfil> {
             const SizedBox(height: 20),
             CircleAvatar(
               radius: 50,
-              backgroundColor: Colors.blue.shade100,
               child: Icon(Icons.person, size: 50, color: Colors.blue.shade800),
             ),
             const SizedBox(height: 20),
@@ -233,7 +230,6 @@ class _PantallaPerfilState extends State<PantallaPerfil> {
             if (esAnonimo) ...[
               const SizedBox(height: 20),
               const Card(
-                color: Colors.amberAccent,
                 child: Padding(
                   padding: EdgeInsets.all(12),
                   child: Column(
@@ -263,7 +259,6 @@ class _PantallaPerfilState extends State<PantallaPerfil> {
             const SizedBox(height: 30),
             ElevatedButton(
               onPressed: _cerrarSesion,
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
               child: const Text('Cerrar sesión'),
             ),
           ],

@@ -53,8 +53,6 @@ class _FormularioOpcionalState extends State<FormularioOpcional> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Datos opcionales'),
-        backgroundColor: Colors.blue,
-        foregroundColor: Colors.white,
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -121,7 +119,7 @@ class _FormularioOpcionalState extends State<FormularioOpcional> {
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey),
+                    border: Border.all(color: Color(0xFF1A2A4A)),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: const Text(
