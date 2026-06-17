@@ -93,6 +93,14 @@
 - **Fecha**: 16/06/2026
 - **Motivo**: Mejorar la identidad visual de monedas y billetes.
 
+## Decisión: Rediseñar la pantalla de detalle con pestañas y formato de imágenes diferenciado
+- **Fecha**: 17/06/2026
+- **Motivo**: Mejorar la experiencia de usuario al visualizar la información completa de una pieza, organizada por categorías, y adaptar el formato de las imágenes según el tipo (moneda/billete).
+
+## Decisión: Mantener solo dos pestañas en detalle (General y Físicas)
+- **Fecha**: 17/06/2026
+- **Motivo**: Simplificar la interfaz mientras no se utilizan las otras secciones (Fotos). Se dejan comentadas para futuras expansiones.
+
 Ahora que el login y perfil están funcionando, el usuario puede registrarse y vincular su cuenta anónima. Esto completa una de las tareas más importantes. Vamos a actualizar la documentación y luego definir los próximos pasos.
 
 ## Problemas resueltos

@@ -95,16 +95,21 @@
 - Al cambiar de pestaña, el `AppBar` superior actualiza su título dinámicamente ("Mi Colección" o "Mi Perfil").
 - No se incluyen iconos de perfil en el `AppBar` de la lista, ya que el acceso al perfil es desde el menú inferior.
 
-## Pantalla de lista de monedas (diseño actual)
+## Pantalla de detalle de moneda/billete (rediseñada)
 
-- **Campo de búsqueda**: con hint "Buscar por denominación, país o año".
-- **Filtros tipo**: chips "Todos", "Monedas", "Billetes" con estilo moderno
-- **Filtros avanzados**: dentro de `ExpansionTile` (rango de años, composición).
-- **Tarjetas**: cada moneda se muestra en una tarjeta con:
-  - Icono circular (dorado) a la izquierda.
-  - Denominación en negrita grande.
-  - País y año en la misma línea debajo.
-  - Botones de editar (azul) y eliminar (rojo) a la derecha.
+### Estructura general
+- **AppBar**: Título con la denominación de la pieza y un botón de editar (lápiz) que abrirá el formulario de edición (pendiente de implementar).
+- **Cabecera**:
+  - Miniatura del anverso a la izquierda (cuadrada para monedas, rectangular para billetes).
+  - Denominación en negrita (tamaño 28) y país · año debajo (tamaño 16), alineados a la izquierda.
+- **Miniaturas de fotos**: Anverso y reverso en una fila debajo de la cabecera, con formato cuadrado para monedas y rectangular para billetes.
+- **Pestañas**: Actualmente solo dos: **General** y **Físicas** (la pestaña "Adicional" está comentada para futura expansión; "Fotos" no se usa por ahora).
+  - **General**: Muestra denominación, país, año y cantidad.
+  - **Físicas**: Muestra composición, peso (g) y diámetro (mm) (solo visible para monedas; para billetes muestra un mensaje informativo).
+- **Modo oscuro**: Todos los colores se adaptan al tema del sistema.
+### Interacción
+- Al tocar una pieza en la lista, se abre esta pantalla de detalle.
+- El botón de editar (lápiz) en el AppBar está preparado para futura implementación (por ahora muestra un mensaje temporal).
 
   ## Formulario de datos obligatorios (diálogo)
 - **Título**: "Nueva pieza".
