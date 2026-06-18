@@ -270,7 +270,7 @@ class _PantallaAuthState extends State<PantallaAuth> {
                 if (_isLoading)
                   const CircularProgressIndicator()
                 else
-                  ElevatedButton(
+                  OutlinedButton(
                     onPressed: _submit,
                     style: ElevatedButton.styleFrom(
                       minimumSize: const Size(double.infinity, 45),
@@ -314,7 +314,7 @@ class _PantallaAuthState extends State<PantallaAuth> {
                       if (mounted) setState(() => _isLoading = false);
                     }
                   },
-                  child: const Text('Seguir como invitado'),
+                  child: const Text('Seguir como invitado →'),
                 ),
               ],
             ),

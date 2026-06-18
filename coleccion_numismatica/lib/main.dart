@@ -85,8 +85,8 @@ class ColeccionNumismaticaApp extends StatelessWidget {
     useMaterial3: true,
     brightness: Brightness.dark,
     colorScheme: const ColorScheme.dark(
-      primary: Color(0xFF1A2A4A),
-      secondary: Color(0xFFC9A03D),
+      primary: Color(0xFFb4c4e4),
+      secondary: Color(0xFFC39937),
       surface: Color(0xFF2C2C2C),
       background: Color(0xFF121212),
       error: Color(0xFFC53030),

@@ -264,23 +264,21 @@ class _DetalleMonedaState extends State<DetalleMoneda>
 
   Widget _buildCampo(String label, String? valor) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
+      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          SizedBox(
-            width: 120,
-            child: Text(
-              label,
-              style: TextStyle(
-                fontWeight: FontWeight.w600,
-                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
-              ),
+          Text(
+            label,
+            style: TextStyle(
+              fontWeight: FontWeight.w600,
+              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
             ),
           ),
           Expanded(
             child: Text(
               valor != null && valor.isNotEmpty ? valor : '—',
+              textAlign: TextAlign.end,
               style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
             ),
           ),
@@ -294,14 +292,14 @@ class _DetalleMonedaState extends State<DetalleMoneda>
   Widget _buildGeneralTab(Map<String, String> moneda) {
     return Padding(
       padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+      child: Align(
+        alignment: Alignment.topCenter,
+        child: _buildTabla([
           _buildCampo('Denominación', moneda['denominacion']),
           _buildCampo('País', moneda['pais']),
           _buildCampo('Año', moneda['anio']),
           _buildCampo('Cantidad', moneda['cantidad']),
-        ],
+        ]),
       ),
     );
   }
@@ -318,13 +316,13 @@ class _DetalleMonedaState extends State<DetalleMoneda>
     }
     return Padding(
       padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+      child: Align(
+        alignment: Alignment.topCenter,
+        child: _buildTabla([
           _buildCampo('Composición', moneda['composicion']),
           _buildCampo('Peso (g)', moneda['peso']),
           _buildCampo('Diámetro (mm)', moneda['diametro']),
-        ],
+        ]),
       ),
     );
   }
@@ -416,6 +414,37 @@ class _DetalleMonedaState extends State<DetalleMoneda>
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildTabla(List<Widget> campos) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final borderColor = colorScheme.outline;
+
+    return Container(
+      decoration: BoxDecoration(
+        border: Border.all(color: borderColor, width: 1.0),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children:
+            campos.asMap().entries.map((entry) {
+              final index = entry.key;
+              final child = entry.value;
+              return Column(
+                children: [
+                  child,
+                  if (index < campos.length - 1)
+                    Container(
+                      height: 1.0,
+                      color: borderColor,
+                      margin: const EdgeInsets.symmetric(horizontal: 16),
+                    ),
+                ],
+              );
+            }).toList(),
+      ),
     );
   }
 }
