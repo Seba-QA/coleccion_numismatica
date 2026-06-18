@@ -137,3 +137,26 @@
   - Campos "Peso (g)" y "Diámetro (mm)" en la misma fila, cada uno con sufijo fijo ("g" y "mm") dentro del campo.
 - **Botón**: "Guardar pieza" (primario, ancho completo).
 - **Nota**: No incluye sección de "Información adicional" (se omite por ahora).
+
+## Pantalla de perfil (rediseñada)
+
+### Cabecera
+- **Avatar**: Círculo con la inicial del nombre de usuario (o del email, o "?" si es anónimo).
+- **Nombre**: Muestra el nombre del usuario (obtenido del email, displayName, o "Invitado" para anónimos).
+- **Estadísticas**: (placeholder) Muestra total de piezas y países (actualmente en 0, pendiente de implementar la lógica en vista de estadísticas).
+
+### Tarjetas de información
+- **Correo electrónico**: Muestra el email del usuario autenticado.
+- **Método de autenticación**: Muestra el proveedor usado (Google, Email/Contraseña, Anónimo).
+
+### Sección "DATOS DE COLECCIÓN"
+- **Exportar colección**: Botón que permite exportar la colección a JSON (compartir archivo).
+- **Importar colección**: Botón que permite importar un archivo JSON con opciones de reemplazar o fusionar.
+
+### Sección "CUENTA"
+- **Vincular cuenta**: (solo visible para usuarios anónimos) Muestra una advertencia y un botón para vincular la cuenta anónima a una cuenta permanente (email/Google).
+- **Cerrar sesión**: Botón en rojo que cierra la sesión del usuario y vuelve a la pantalla de login.
+
+### Notas
+- La pestaña "Adicional" en el detalle está comentada (reservada para futuras mejoras).
+- Las estadísticas de perfil (piezas/países) se implementarán en una vista de estadísticas dedicada.

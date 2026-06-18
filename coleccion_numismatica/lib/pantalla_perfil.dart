@@ -33,6 +33,7 @@ class _PantallaPerfilState extends State<PantallaPerfil> {
     _user = FirebaseAuth.instance.currentUser!;
   }
 
+  // ---------- Funciones existentes (sin cambios) ----------
   Future<void> _exportarDatos() async {
     try {
       final jsonData = jsonEncode(widget.monedas);
@@ -71,7 +72,6 @@ class _PantallaPerfilState extends State<PantallaPerfil> {
 
   Future<void> _importarDatos() async {
     try {
-      // Seleccionar archivo JSON
       FilePickerResult? result = await FilePicker.platform.pickFiles(
         type: FileType.custom,
         allowedExtensions: ['json'],
@@ -85,7 +85,6 @@ class _PantallaPerfilState extends State<PantallaPerfil> {
           .map((e) => Map<String, String>.from(e as Map<dynamic, dynamic>))
           .toList();
 
-      // Diálogo de opción: reemplazar o fusionar
       final opcion = await showDialog<String>(
         context: context,
         builder: (context) => AlertDialog(
@@ -118,7 +117,6 @@ class _PantallaPerfilState extends State<PantallaPerfil> {
           .doc(user.uid)
           .collection('monedas');
 
-      // Mostrar indicador de carga
       showDialog(
         context: context,
         barrierDismissible: false,
@@ -126,17 +124,14 @@ class _PantallaPerfilState extends State<PantallaPerfil> {
       );
 
       if (opcion == 'reemplazar') {
-        // Eliminar todos los documentos existentes
         final snapshot = await collectionRef.get();
         for (var doc in snapshot.docs) {
           await doc.reference.delete();
         }
-        // Agregar los nuevos
         for (var moneda in nuevasMonedas) {
           await collectionRef.add(moneda);
         }
       } else if (opcion == 'fusionar') {
-        // Obtener claves existentes (país + denominación + año)
         final snapshot = await collectionRef.get();
         final Set<String> clavesExistentes = {};
         for (var doc in snapshot.docs) {
@@ -144,7 +139,6 @@ class _PantallaPerfilState extends State<PantallaPerfil> {
           final clave = '${data['pais']}_${data['denominacion']}_${data['anio']}';
           clavesExistentes.add(clave);
         }
-        // Añadir solo las monedas que no existan
         for (var moneda in nuevasMonedas) {
           final clave = '${moneda['pais']}_${moneda['denominacion']}_${moneda['anio']}';
           if (!clavesExistentes.contains(clave)) {
@@ -153,10 +147,7 @@ class _PantallaPerfilState extends State<PantallaPerfil> {
         }
       }
 
-      // Cerrar indicador de carga
-      Navigator.pop(context); // cierra el diálogo de progreso
-
-      // Recargar los datos en la pantalla principal
+      Navigator.pop(context);
       if (widget.onDatosCambiados != null) {
         widget.onDatosCambiados!();
       }
@@ -177,6 +168,7 @@ class _PantallaPerfilState extends State<PantallaPerfil> {
     if (mounted) Navigator.popUntil(context, (route) => route.isFirst);
   }
 
+  // ---------- Funciones auxiliares ----------
   String _obtenerMetodoAutenticacion() {
     if (_user.isAnonymous) return 'anonimo';
     if (_user.providerData.isNotEmpty) return _user.providerData.first.providerId;
@@ -196,89 +188,290 @@ class _PantallaPerfilState extends State<PantallaPerfil> {
     }
   }
 
+  String _obtenerNombreUsuario() {
+    if (_user.isAnonymous) return 'Invitado';
+    if (_user.displayName != null && _user.displayName!.isNotEmpty) {
+      return _user.displayName!;
+    }
+    final email = _user.email;
+    if (email != null && email.contains('@')) {
+      return email.split('@').first;
+    }
+    return 'Usuario';
+  }
+
+  // ---------- Estadísticas ----------
+  int get _totalPiezas => widget.monedas?.length ?? 0;
+
+  int get _totalPaises {
+    final lista = widget.monedas;
+    if (lista == null || lista.isEmpty) return 0;
+    final paises = lista.map((m) => m['pais'] ?? '').where((p) => p.isNotEmpty).toSet();
+    return paises.length;
+  }
+
   @override
   Widget build(BuildContext context) {
-    final email = _user.email ?? 'Sin email';
-    final providerId = _obtenerMetodoAutenticacion();
-    final metodoString = _metodoString(providerId);
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
     final esAnonimo = _user.isAnonymous;
+    final nombre = _obtenerNombreUsuario();
+    final email = _user.email ?? 'Sin email';
+    final metodoString = _metodoString(_obtenerMetodoAutenticacion());
 
     return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.all(16),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const SizedBox(height: 20),
-            CircleAvatar(
-              radius: 50,
-              child: Icon(Icons.person, size: 50, color: Colors.blue.shade800),
-            ),
-            const SizedBox(height: 20),
-            Card(
-              child: ListTile(
-                leading: const Icon(Icons.email),
-                title: const Text('Email'),
-                subtitle: Text(email),
+            // ---------- CABECERA ----------
+            Center(
+              child: Column(
+                children: [
+                  CircleAvatar(
+                    radius: 50,
+                    backgroundColor: colorScheme.primary.withOpacity(0.2),
+                    child: Text(
+                      nombre.isNotEmpty ? nombre[0].toUpperCase() : '?',
+                      style: TextStyle(
+                        fontSize: 40,
+                        fontWeight: FontWeight.bold,
+                        color: colorScheme.primary,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    nombre,
+                    style: textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  // "Coleccionista desde" no disponible, omitimos
+                  const SizedBox(height: 8),
+                  // Estadísticas: piezas y países
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      _buildStatItem('$_totalPiezas', 'Piezas'),
+                      const SizedBox(width: 24),
+                      _buildStatItem('$_totalPaises', 'Países'),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                ],
               ),
             ),
-            Card(
-              child: ListTile(
-                leading: const Icon(Icons.security),
-                title: const Text('Método de autenticación'),
-                subtitle: Text(metodoString),
+
+            // ---------- TARJETAS DE INFORMACIÓN ----------
+            _buildInfoCard(
+              icon: Icons.email,
+              title: 'CORREO',
+              subtitle: email,
+            ),
+            _buildInfoCard(
+              icon: Icons.security,
+              title: 'AUTENTICACIÓN',
+              subtitle: metodoString,
+            ),
+            const SizedBox(height: 24),
+            const Text(
+              'DATOS DE COLECCIÓN',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+                color: Color(0xFFC9A03D),
               ),
             ),
-            const SizedBox(height: 20),
-            // Botón exportar
-            ElevatedButton.icon(
-              onPressed: _exportarDatos,
-              icon: const Icon(Icons.download),
-              label: const Text('Exportar colección'),
-              style: ElevatedButton.styleFrom(minimumSize: const Size(double.infinity, 45)),
+            const SizedBox(height: 4),
+            _buildActionCard(
+              icon: Icons.download,
+              title: 'Exportar colección',
+              subtitle: 'JSON',
+              onTap: _exportarDatos,
+            ),
+            _buildActionCard(
+              icon: Icons.upload,
+              title: 'Importar colección',
+              subtitle: 'Desde archivo JSON',
+              onTap: _importarDatos,
+            ),
+            const SizedBox(height: 4),
+            const Text(
+              'CUENTA',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+                color: Color(0xFFC9A03D),
+              ),
             ),
             const SizedBox(height: 12),
-            // Botón importar
-            ElevatedButton.icon(
-              onPressed: _importarDatos,
-              icon: const Icon(Icons.upload),
-              label: const Text('Importar colección'),
-              style: ElevatedButton.styleFrom(minimumSize: const Size(double.infinity, 45)),
-            ),
+
+            // Si es anónimo, mostrar advertencia y botón vincular
             if (esAnonimo) ...[
-              const SizedBox(height: 20),
-              const Card(
+              Card(
+                color: Colors.amber.shade50,
                 child: Padding(
-                  padding: EdgeInsets.all(12),
-                  child: Column(
+                  padding: const EdgeInsets.all(12),
+                  child: Row(
                     children: [
-                      Icon(Icons.warning_amber_rounded, size: 40),
-                      SizedBox(height: 8),
-                      Text(
-                        'Estás en modo invitado. Tus datos no están vinculados a una cuenta y podrías perderlos al desinstalar la app.',
-                        textAlign: TextAlign.center,
+                      const Icon(Icons.warning_amber_rounded, color: Colors.amber),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          'Estás en modo invitado. Tus datos no están vinculados a una cuenta y podrías perderlos al desinstalar la app.',
+                          style: const TextStyle(fontSize: 14),
+                        ),
                       ),
                     ],
                   ),
                 ),
               ),
               const SizedBox(height: 12),
-              ElevatedButton.icon(
-                onPressed: () {
+              _buildActionCard(
+                icon: Icons.link,
+                title: 'Vincular cuenta',
+                subtitle: 'Registrarse o iniciar sesión',
+                onTap: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (_) => const PantallaAuth(isLinking: true)),
                   );
                 },
-                icon: const Icon(Icons.link),
-                label: const Text('Vincular cuenta (Registrarse o Iniciar sesión)'),
               ),
+              const SizedBox(height: 12),
             ],
-            const SizedBox(height: 30),
-            ElevatedButton(
-              onPressed: _cerrarSesion,
-              child: const Text('Cerrar sesión'),
+
+            // Cerrar sesión
+            _buildActionCard(
+              icon: Icons.logout,
+              title: 'Cerrar sesión',
+              subtitle: 'Salir de tu cuenta',
+              onTap: _cerrarSesion,
+              isDestructive: true,
+            ),
+            const SizedBox(height: 20),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ---------- Widgets auxiliares ----------
+
+  Widget _buildStatItem(String value, String label) {
+    return Column(
+      children: [
+        Text(
+          value,
+          style: const TextStyle(
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 14,
+            color: Colors.grey.shade600,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildInfoCard({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+  }) {
+    return Card(
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: Colors.grey.shade300),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+        child: Row(
+          children: [
+            Icon(icon, color: Colors.grey.shade600),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.grey.shade500,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle,
+                    style: const TextStyle(fontSize: 16),
+                  ),
+                ],
+              ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildActionCard({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required VoidCallback onTap,
+    bool isDestructive = false,
+  }) {
+    final color = isDestructive ? Colors.red : Theme.of(context).colorScheme.primary;
+    return Card(
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: Colors.grey.shade300),
+      ),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+          child: Row(
+            children: [
+              Icon(icon, color: color),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                        color: isDestructive ? Colors.red : null,
+                      ),
+                    ),
+                    Text(
+                      subtitle,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey.shade500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(Icons.chevron_right, color: Colors.grey.shade400),
+            ],
+          ),
         ),
       ),
     );

@@ -101,6 +101,14 @@
 - **Fecha**: 17/06/2026
 - **Motivo**: Simplificar la interfaz mientras no se utilizan las otras secciones (Fotos). Se dejan comentadas para futuras expansiones.
 
+## Decisión: Rediseñar la pantalla de perfil con estilo de lista y tarjetas
+- **Fecha**: 18/06/2026
+- **Motivo**: Alinear el perfil con el diseño de Figma, mejorando la legibilidad y organización de la información.
+
+## Decisión: Aplazar estadísticas de perfil a una vista dedicada
+- **Fecha**: 18/06/2026
+- **Motivo**: El cálculo de total de piezas y países no es crítico en el perfil y tiene más sentido en una vista de estadísticas (con gráficos, distribución por país, etc.).
+
 Ahora que el login y perfil están funcionando, el usuario puede registrarse y vincular su cuenta anónima. Esto completa una de las tareas más importantes. Vamos a actualizar la documentación y luego definir los próximos pasos.
 
 ## Problemas resueltos
