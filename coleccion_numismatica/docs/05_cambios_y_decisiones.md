@@ -109,6 +109,18 @@
 - **Fecha**: 18/06/2026
 - **Motivo**: El cálculo de total de piezas y países no es crítico en el perfil y tiene más sentido en una vista de estadísticas (con gráficos, distribución por país, etc.).
 
+## Decisión: Implementar pantalla de estadísticas con gráficos
+- **Fecha**: 19/06/2026
+- **Motivo**: Proporcionar una visión visual y resumida de la colección (totales, distribución por tipo, país y década).
+
+## Decisión: Migrar lista de colección a `StreamBuilder` para actualización en tiempo real
+- **Fecha**: 19/06/2026
+- **Motivo**: La lista no se actualizaba tras importar datos o realizar cambios. Se necesitaba sincronización automática con Firestore.
+
+## Decisión: Eliminar selector manual de tema y usar solo tema del sistema
+- **Fecha**: 19/06/2026
+- **Motivo**: El selector manual causaba errores transitorios de `unmounted` al reconstruir `MaterialApp`. En lugar de parchear el error, se optó por simplificar y usar el tema del sistema (`ThemeMode.system`), que ya funcionaba correctamente.
+
 Ahora que el login y perfil están funcionando, el usuario puede registrarse y vincular su cuenta anónima. Esto completa una de las tareas más importantes. Vamos a actualizar la documentación y luego definir los próximos pasos.
 
 ## Problemas resueltos
@@ -131,6 +143,7 @@ Ahora que el login y perfil están funcionando, el usuario puede registrarse y v
 17. Conflictos de nulabilidad en `_composicionQuery` resueltos usando `String` no nullable con valor inicial vacío.
 18. Se eliminó código redundante que mezclaba `DropdownButton` con `TextField`.
 19. Tras la limpieza de estilos inline, se perdió el borde visual que indicaba el área del selector. Se restauró en `selector_imagen.dart` con `BoxDecoration(border: Border.all(color: Colors.grey), borderRadius: BorderRadius.circular(8))`.
+
 
 ## Pendientes para próxima sesión
 - Verificar que las fotos copiadas al directorio permanente no se pierdan al cerrar/abrir la app✅

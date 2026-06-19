@@ -125,6 +125,12 @@
   - Mensajes de error se muestran debajo de cada campo.
 - **Botones**: "Cancelar" (texto) y "Continuar →" (primario) en la misma fila.
 
+  ## Lista de colección (actualización en tiempo real)
+- La lista de monedas ahora usa `StreamBuilder` para escuchar cambios en Firestore.
+- Cualquier modificación (importación, edición, eliminación, adición) se refleja automáticamente sin necesidad de recargar la app.
+- Los filtros (búsqueda, tipo, rango de años, composición) se aplican sobre los datos en tiempo real.
+- Se eliminó la dependencia de Hive para la lista principal (ahora solo se usa Firestore como fuente de verdad).
+
 ## Formulario de datos opcionales (pantalla completa)
 - **Subtítulo**: "Puedes completarlo más adelante".
 - **Sección FOTOGRAFÍAS**:
@@ -160,3 +166,19 @@
 ### Notas
 - La pestaña "Adicional" en el detalle está comentada (reservada para futuras mejoras).
 - Las estadísticas de perfil (piezas/países) se implementarán en una vista de estadísticas dedicada.
+
+## Pantalla de estadísticas (nueva)
+
+Accesible desde la tercera pestaña del menú inferior (icono de gráfico).
+
+### Datos mostrados
+- **Tarjetas resumen**: Total de piezas, países únicos, cantidad de monedas y billetes.
+- **Gráfico de tarta**: Distribución entre monedas y billetes.
+- **Gráfico de barras (Top 5 países)**: Países con mayor número de piezas en la colección.
+- **Gráfico de barras (distribución por década)**: Agrupación de piezas por década (ej. 1940, 1950, 1960...).
+
+### Comportamiento
+- Los datos se cargan directamente desde Firestore al abrir la pestaña.
+- La vista se actualiza automáticamente al agregar, editar o eliminar piezas (gracias a `StreamBuilder`).
+- Si no hay datos, se muestra un mensaje informativo.
+- Los gráficos usan los colores del tema (primario, secundario, terracota) y se adaptan al modo oscuro.
