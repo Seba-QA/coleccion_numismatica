@@ -34,15 +34,19 @@ class ColeccionNumismaticaApp extends StatelessWidget {
     useMaterial3: true,
     brightness: Brightness.light,
     colorScheme: const ColorScheme.light(
-      primary: Color(0xFF1A2A4A), // azul marino
-      secondary: Color(0xFFC9A03D), // dorado
-      surface: Colors.white,
-      background: Color(0xFFF8F9FA),
-      error: Color(0xFFC53030),
+      primary: Color(0xFF1A2A4A), // Primario
+      secondary: Color(0xFFC9A03D), // Dorado
+      tertiary: Color(0xFFB95C3A), // Terracota (Acento)
+      surface: Color(0xFFFFFFFF), // Superficie
+      surfaceTint: Color(0xFFE8E4DE), // Superficie alt.
+      background: Color(0xFFF0EDE8), // Fondo
+      error: Color(0xFFC53030), // Error
       onPrimary: Colors.white,
       onSecondary: Colors.white,
-      onSurface: Color(0xFF2D3748),
-      onBackground: Color(0xFF2D3748),
+      onSurface: Color(0xFF1A2A4A), // Texto principal
+      onSurfaceVariant: Color(0xFF718096), // Texto secundario
+      onBackground: Color(0xFF1A2A4A),
+      onError: Colors.white,
     ),
     appBarTheme: const AppBarTheme(
       centerTitle: false,
@@ -59,24 +63,44 @@ class ColeccionNumismaticaApp extends StatelessWidget {
       style: ElevatedButton.styleFrom(
         minimumSize: const Size(double.infinity, 48),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        backgroundColor: const Color(0xFF1A2A4A),
+        foregroundColor: Colors.white,
       ),
     ),
     outlinedButtonTheme: OutlinedButtonThemeData(
       style: OutlinedButton.styleFrom(
         minimumSize: const Size(double.infinity, 48),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        side: const BorderSide(color: Color(0xFF1A2A4A)),
       ),
     ),
     cardTheme: CardTheme(
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      color: Colors.white,
+    ),
+    dividerTheme: DividerThemeData(
+      color: const Color(0xFF1A2A4A).withOpacity(0.13), // Borde
+      thickness: 1,
     ),
     textTheme: const TextTheme(
-      titleLarge: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-      titleMedium: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-      bodyLarge: TextStyle(fontSize: 16),
-      bodyMedium: TextStyle(fontSize: 14),
-      labelLarge: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+      titleLarge: TextStyle(
+        fontSize: 24,
+        fontWeight: FontWeight.bold,
+        color: Color(0xFF1A2A4A),
+      ),
+      titleMedium: TextStyle(
+        fontSize: 18,
+        fontWeight: FontWeight.w600,
+        color: Color(0xFF1A2A4A),
+      ),
+      bodyLarge: TextStyle(fontSize: 16, color: Color(0xFF1A2A4A)),
+      bodyMedium: TextStyle(fontSize: 14, color: Color(0xFF718096)),
+      labelLarge: TextStyle(
+        fontSize: 14,
+        fontWeight: FontWeight.w500,
+        color: Color(0xFF1A2A4A),
+      ),
     ),
   );
 
@@ -85,49 +109,73 @@ class ColeccionNumismaticaApp extends StatelessWidget {
     useMaterial3: true,
     brightness: Brightness.dark,
     colorScheme: const ColorScheme.dark(
-      primary: Color(0xFFb4c4e4),
-      secondary: Color(0xFFC39937),
-      surface: Color(0xFF2C2C2C),
-      background: Color(0xFF121212),
-      error: Color(0xFFC53030),
-      onPrimary: Colors.white,
+      primary: Color(0xFFC9A03D), // Dorado (Primario en oscuro)
+      secondary: Color(0xFF1E3260), // Azul secundario
+      tertiary: Color(0xFFB95C3A), // Terracota (Acento)
+      surface: Color(0xFF1A2A4A), // Superficie
+      surfaceTint: Color(0xFF1E3260), // Superficie alt.
+      background: Color(0xFF0E1824), // Fondo
+      error: Color(0xFFC53030), // Error
+      onPrimary: Color(0xFF0E1824), // Texto sobre primario (oscuro)
       onSecondary: Colors.white,
-      onSurface: Colors.white,
-      onBackground: Colors.white,
+      onSurface: Color(0xFFF0EDE8), // Texto principal
+      onSurfaceVariant: Color(0xFFA0AEC0), // Texto secundario
+      onBackground: Color(0xFFF0EDE8),
+      onError: Colors.white,
     ),
     appBarTheme: const AppBarTheme(
       centerTitle: false,
       elevation: 0,
       backgroundColor: Color(0xFF1A2A4A),
-      foregroundColor: Colors.white,
+      foregroundColor: Color(0xFFF0EDE8),
     ),
     inputDecorationTheme: InputDecorationTheme(
       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
       filled: true,
-      fillColor: Color(0xFF3A3A3A),
+      fillColor: Color(0xFF1A2A4A),
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
         minimumSize: const Size(double.infinity, 48),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        backgroundColor: const Color(0xFFC9A03D),
+        foregroundColor: const Color(0xFF0E1824),
       ),
     ),
     outlinedButtonTheme: OutlinedButtonThemeData(
       style: OutlinedButton.styleFrom(
         minimumSize: const Size(double.infinity, 48),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        side: const BorderSide(color: Color(0xFFC9A03D)),
       ),
     ),
     cardTheme: CardTheme(
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      color: const Color(0xFF1A2A4A),
+    ),
+    dividerTheme: DividerThemeData(
+      color: const Color(0xFFF0EDE8).withOpacity(0.10), // Borde
+      thickness: 1,
     ),
     textTheme: const TextTheme(
-      titleLarge: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-      titleMedium: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-      bodyLarge: TextStyle(fontSize: 16),
-      bodyMedium: TextStyle(fontSize: 14),
-      labelLarge: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+      titleLarge: TextStyle(
+        fontSize: 24,
+        fontWeight: FontWeight.bold,
+        color: Color(0xFFF0EDE8),
+      ),
+      titleMedium: TextStyle(
+        fontSize: 18,
+        fontWeight: FontWeight.w600,
+        color: Color(0xFFF0EDE8),
+      ),
+      bodyLarge: TextStyle(fontSize: 16, color: Color(0xFFF0EDE8)),
+      bodyMedium: TextStyle(fontSize: 14, color: Color(0xFFA0AEC0)),
+      labelLarge: TextStyle(
+        fontSize: 14,
+        fontWeight: FontWeight.w500,
+        color: Color(0xFFC9A03D),
+      ),
     ),
   );
 
@@ -138,9 +186,9 @@ class ColeccionNumismaticaApp extends StatelessWidget {
       title: 'Colección Numismática',
       theme: _lightTheme,
       darkTheme: _darkTheme,
-      //themeMode: ThemeMode.system,
+      themeMode: ThemeMode.system,
       //themeMode: ThemeMode.dark,
-      themeMode: ThemeMode.light,
+      //themeMode: ThemeMode.light,
       home: StreamBuilder<User?>(
         stream: authService.userChanges,
         builder: (context, snapshot) {
@@ -174,7 +222,6 @@ class ListaMonedas extends StatefulWidget {
 
 class _ListaMonedasState extends State<ListaMonedas> {
   late Box _monedasBox;
-  List<Map<String, String>> _monedas = [];
   String _tipoSeleccionado = 'moneda';
   List<Map<String, String>> _filteredMonedas = [];
   String _searchQuery = '';
@@ -224,7 +271,6 @@ class _ListaMonedasState extends State<ListaMonedas> {
   @override
   void initState() {
     super.initState();
-    _cargarMonedas();
   }
 
   @override
@@ -241,26 +287,79 @@ class _ListaMonedasState extends State<ListaMonedas> {
   }
 
   void _applyFilters() {
-    List<Map<String, String>> resultado = List.from(_monedas);
+    List<Map<String, String>> _filtrarLista(
+      List<Map<String, String>> listaCompleta,
+    ) {
+      List<Map<String, String>> resultado = List.from(listaCompleta);
 
-    // 1. Filtro por texto de búsqueda (denominación, país o año)
+      if (_searchQuery.isNotEmpty) {
+        final query = _searchQuery.toLowerCase();
+        resultado =
+            resultado.where((moneda) {
+              return moneda['denominacion']!.toLowerCase().contains(query) ||
+                  moneda['pais']!.toLowerCase().contains(query) ||
+                  moneda['anio']!.toLowerCase().contains(query);
+            }).toList();
+      }
+
+      if (_filterTipo != null) {
+        resultado =
+            resultado.where((moneda) => moneda['tipo'] == _filterTipo).toList();
+      }
+
+      if (_anioDesde != null) {
+        resultado =
+            resultado.where((moneda) {
+              final anio = int.tryParse(moneda['anio'] ?? '');
+              return anio != null && anio >= _anioDesde!;
+            }).toList();
+      }
+      if (_anioHasta != null) {
+        resultado =
+            resultado.where((moneda) {
+              final anio = int.tryParse(moneda['anio'] ?? '');
+              return anio != null && anio <= _anioHasta!;
+            }).toList();
+      }
+
+      if (_composicionQuery.isNotEmpty) {
+        final query = _composicionQuery.toLowerCase();
+        resultado =
+            resultado.where((moneda) {
+              if (moneda['tipo'] != 'moneda') return false;
+              final comp = moneda['composicion']?.toLowerCase() ?? '';
+              return comp.contains(query);
+            }).toList();
+      }
+
+      return resultado;
+    }
+  }
+
+  void _refrescarFiltros() {
+    setState(() {});
+  }
+
+  List<Map<String, String>> _filtrarLista(
+    List<Map<String, String>> listaCompleta,
+  ) {
+    List<Map<String, String>> resultado = List.from(listaCompleta);
+
     if (_searchQuery.isNotEmpty) {
+      final query = _searchQuery.toLowerCase();
       resultado =
           resultado.where((moneda) {
-            final query = _searchQuery.toLowerCase();
             return moneda['denominacion']!.toLowerCase().contains(query) ||
                 moneda['pais']!.toLowerCase().contains(query) ||
                 moneda['anio']!.toLowerCase().contains(query);
           }).toList();
     }
 
-    // 2. Filtro por tipo (moneda / billete)
     if (_filterTipo != null) {
       resultado =
           resultado.where((moneda) => moneda['tipo'] == _filterTipo).toList();
     }
 
-    // 3. Filtro por rango de años
     if (_anioDesde != null) {
       resultado =
           resultado.where((moneda) {
@@ -276,7 +375,6 @@ class _ListaMonedasState extends State<ListaMonedas> {
           }).toList();
     }
 
-    // 4. Filtro por texto en composición (solo monedas)
     if (_composicionQuery.isNotEmpty) {
       final query = _composicionQuery.toLowerCase();
       resultado =
@@ -287,60 +385,7 @@ class _ListaMonedasState extends State<ListaMonedas> {
           }).toList();
     }
 
-    setState(() {
-      _filteredMonedas = resultado;
-    });
-  }
-
-  // ===================== CARGA DESDE FIRESTORE =====================
-  Future<void> _cargarMonedas() async {
-    print('=== INICIANDO CARGA DE MONEDAS ===');
-    _monedasBox = await Hive.openBox('monedas');
-    print('=== Hive abierto, contiene: ${_monedasBox.length} ===');
-    final user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      final snapshot =
-          await FirebaseFirestore.instance
-              .collection('usuarios')
-              .doc(user.uid)
-              .collection('monedas')
-              .get();
-      print('Número de documentos en Firestore: ${snapshot.docs.length}');
-      final List<Map<String, String>> listaFirestore = [];
-      for (var doc in snapshot.docs) {
-        final data = doc.data() as Map<String, dynamic>;
-        final moneda = Map<String, String>.from(data);
-        moneda['_id'] = doc.id;
-        listaFirestore.add(moneda);
-      }
-      print('Actualizando UI con ${listaFirestore.length} monedas');
-      setState(() {
-        _monedas = listaFirestore;
-      });
-      _applyFilters();
-      print('Cargadas ${_monedas.length} monedas desde Firestore');
-    } else {
-      _recargarLista();
-    }
-  }
-
-  void _recargarLista() {
-    print('=== _recargarLista: iniciando ===');
-    final List<Map<String, String>> lista = [];
-    for (var i = 0; i < _monedasBox.length; i++) {
-      final raw = _monedasBox.getAt(i);
-      if (raw != null) {
-        final moneda = Map<String, String>.from(raw as Map);
-        lista.add(moneda);
-      }
-    }
-    print('=== _recargarLista: monedas en Hive: ${lista.length} ===');
-    setState(() {
-      _monedas = lista;
-    });
-    print(
-      '=== _recargarLista: _monedas actualizada con ${_monedas.length} ===',
-    );
+    return resultado;
   }
 
   // ===================== CONSTRUCTOR DE VISTA =====================
@@ -368,7 +413,7 @@ class _ListaMonedasState extends State<ListaMonedas> {
                             onPressed: () {
                               _searchController.clear();
                               _searchQuery = '';
-                              _applyFilters();
+                              _refrescarFiltros();
                             },
                           )
                           : null,
@@ -378,7 +423,7 @@ class _ListaMonedasState extends State<ListaMonedas> {
                 ),
                 onChanged: (value) {
                   _searchQuery = value;
-                  _applyFilters();
+                  _refrescarFiltros();
                 },
               ),
             ),
@@ -396,7 +441,7 @@ class _ListaMonedasState extends State<ListaMonedas> {
                       setState(() {
                         _filterTipo = null;
                       });
-                      _applyFilters();
+                      _refrescarFiltros();
                     },
                   ),
                   const SizedBox(width: 8),
@@ -407,7 +452,7 @@ class _ListaMonedasState extends State<ListaMonedas> {
                       setState(() {
                         _filterTipo = selected ? 'moneda' : null;
                       });
-                      _applyFilters();
+                      _refrescarFiltros();
                     },
                   ),
                   const SizedBox(width: 8),
@@ -418,7 +463,7 @@ class _ListaMonedasState extends State<ListaMonedas> {
                       setState(() {
                         _filterTipo = selected ? 'billete' : null;
                       });
-                      _applyFilters();
+                      _refrescarFiltros();
                     },
                   ),
                 ],
@@ -428,7 +473,6 @@ class _ListaMonedasState extends State<ListaMonedas> {
             ExpansionTile(
               title: const Text('Filtros avanzados'),
               children: [
-                // Fila de años: desde y hasta
                 Padding(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 16,
@@ -447,7 +491,7 @@ class _ListaMonedasState extends State<ListaMonedas> {
                           onChanged: (value) {
                             _anioDesde =
                                 value.isEmpty ? null : int.tryParse(value);
-                            _applyFilters();
+                            _refrescarFiltros();
                           },
                         ),
                       ),
@@ -463,14 +507,13 @@ class _ListaMonedasState extends State<ListaMonedas> {
                           onChanged: (value) {
                             _anioHasta =
                                 value.isEmpty ? null : int.tryParse(value);
-                            _applyFilters();
+                            _refrescarFiltros();
                           },
                         ),
                       ),
                     ],
                   ),
                 ),
-                // Campo de composición (texto libre)
                 Padding(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 16,
@@ -490,7 +533,7 @@ class _ListaMonedasState extends State<ListaMonedas> {
                                     _composicionQuery = '';
                                     _composicionQueryController.clear();
                                   });
-                                  _applyFilters();
+                                  _refrescarFiltros();
                                 },
                               )
                               : null,
@@ -499,11 +542,10 @@ class _ListaMonedasState extends State<ListaMonedas> {
                       setState(() {
                         _composicionQuery = value ?? '';
                       });
-                      _applyFilters();
+                      _refrescarFiltros();
                     },
                   ),
                 ),
-                // Botón para limpiar todos los filtros
                 Padding(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 16,
@@ -519,146 +561,174 @@ class _ListaMonedasState extends State<ListaMonedas> {
                         _anioHasta = null;
                         _composicionQuery = '';
                       });
-                      _applyFilters();
+                      _refrescarFiltros();
                     },
                     child: const Text('Limpiar filtros'),
                   ),
                 ),
               ],
             ),
-            // Lista de resultados filtrados
+            // Lista con StreamBuilder
             Expanded(
-              child:
-                  _filteredMonedas.isEmpty
-                      ? const Center(
-                        child: Text(
-                          'No hay monedas o billetes que coincidan con la búsqueda',
-                        ),
-                      )
-                      : ListView.builder(
-                        itemCount: _filteredMonedas.length,
-                        itemBuilder: (context, index) {
-                          final moneda = _filteredMonedas[index];
-                          final esMoneda = moneda['tipo'] == 'moneda';
-                          return GestureDetector(
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder:
-                                      (context) =>
-                                          DetalleMoneda(moneda: moneda),
-                                ),
-                              );
-                            },
-                            child: Card(
-                              margin: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 8,
-                              ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              elevation: 2,
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 8,
-                                  horizontal: 12,
-                                ),
-                                child: Row(
-                                  children: [
-                                    // Icono izquierdo (moneda/billete)
-                                    Container(
-                                      width: 40,
-                                      height: 40,
-                                      decoration: BoxDecoration(
-                                        color: Colors.amber.withOpacity(0.2),
-                                        shape: BoxShape.circle,
-                                      ),
-                                      child: Icon(
-                                        esMoneda
-                                            ? Icons.monetization_on
-                                            : Icons.attach_money,
-                                        color: const Color(0xFFC9A03D),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 12),
-                                    // Texto: denominación + país/año
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            moneda['denominacion']!,
-                                            style: const TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 18,
-                                            ),
-                                          ),
-                                          Text(
-                                            '${moneda['pais']} - año ${moneda['anio']}',
-                                            style: TextStyle(
-                                              color: Theme.of(context)
-                                                  .colorScheme
-                                                  .onSurface
-                                                  .withOpacity(0.7),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    // Botones de editar y eliminar
-                                    Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        IconButton(
-                                          icon: const Icon(
-                                            Icons.edit,
-                                            color: Colors.blue,
-                                          ),
-                                          onPressed: () {
-                                            _mostrarFormulario(
-                                              indice: index,
-                                              monedaEditada: moneda,
-                                            );
-                                          },
-                                        ),
-                                        IconButton(
-                                          icon: const Icon(
-                                            Icons.delete,
-                                            color: Colors.red,
-                                          ),
-                                          onPressed: () async {
-                                            final monedaAEliminar =
-                                                _filteredMonedas[index];
-                                            final user =
-                                                FirebaseAuth
-                                                    .instance
-                                                    .currentUser;
-                                            if (user != null &&
-                                                monedaAEliminar.containsKey(
-                                                  '_id',
-                                                )) {
-                                              await FirebaseFirestore.instance
-                                                  .collection('usuarios')
-                                                  .doc(user.uid)
-                                                  .collection('monedas')
-                                                  .doc(monedaAEliminar['_id'])
-                                                  .delete();
-                                            }
-                                            await _cargarMonedas(); // Recarga y aplica filtros
-                                          },
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              ),
+              child: StreamBuilder<QuerySnapshot>(
+                stream:
+                    FirebaseFirestore.instance
+                        .collection('usuarios')
+                        .doc(FirebaseAuth.instance.currentUser?.uid)
+                        .collection('monedas')
+                        .snapshots(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  if (snapshot.hasError) {
+                    return Center(child: Text('Error: ${snapshot.error}'));
+                  }
+                  if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                    return const Center(
+                      child: Text('No hay monedas en tu colección.'),
+                    );
+                  }
+
+                  // Convertir datos
+                  final List<Map<String, String>> listaCompleta =
+                      snapshot.data!.docs.map((doc) {
+                        final data = doc.data() as Map<String, dynamic>;
+                        final moneda = Map<String, String>.from(data);
+                        moneda['_id'] = doc.id;
+                        return moneda;
+                      }).toList();
+
+                  final listaFiltrada = _filtrarLista(listaCompleta);
+
+                  if (listaFiltrada.isEmpty) {
+                    return const Center(
+                      child: Text(
+                        'No hay monedas que coincidan con los filtros.',
+                      ),
+                    );
+                  }
+
+                  return ListView.builder(
+                    itemCount: listaFiltrada.length,
+                    itemBuilder: (context, index) {
+                      final moneda = listaFiltrada[index];
+                      final esMoneda = moneda['tipo'] == 'moneda';
+                      return GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder:
+                                  (context) => DetalleMoneda(moneda: moneda),
                             ),
                           );
                         },
-                      ),
+                        child: Card(
+                          margin: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          elevation: 2,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              vertical: 8,
+                              horizontal: 12,
+                            ),
+                            child: Row(
+                              children: [
+                                Container(
+                                  width: 40,
+                                  height: 40,
+                                  decoration: BoxDecoration(
+                                    color: Colors.amber.withOpacity(0.2),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Icon(
+                                    esMoneda
+                                        ? Icons.monetization_on
+                                        : Icons.attach_money,
+                                    color: const Color(0xFFC9A03D),
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        moneda['denominacion']!,
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 18,
+                                        ),
+                                      ),
+                                      Text(
+                                        '${moneda['pais']} - año ${moneda['anio']}',
+                                        style: TextStyle(
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .onSurface
+                                              .withOpacity(0.7),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    IconButton(
+                                      icon: const Icon(
+                                        Icons.edit,
+                                        color: Colors.blue,
+                                      ),
+                                      onPressed: () {
+                                        _mostrarFormulario(
+                                          indice: index,
+                                          monedaEditada: moneda,
+                                        );
+                                      },
+                                    ),
+                                    IconButton(
+                                      icon: const Icon(
+                                        Icons.delete,
+                                        color: Colors.red,
+                                      ),
+                                      onPressed: () async {
+                                        final monedaAEliminar =
+                                            listaFiltrada[index];
+                                        final user =
+                                            FirebaseAuth.instance.currentUser;
+                                        if (user != null &&
+                                            monedaAEliminar.containsKey(
+                                              '_id',
+                                            )) {
+                                          await FirebaseFirestore.instance
+                                              .collection('usuarios')
+                                              .doc(user.uid)
+                                              .collection('monedas')
+                                              .doc(monedaAEliminar['_id'])
+                                              .delete();
+                                        }
+                                        // No es necesario recargar, el StreamBuilder se actualiza solo
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
             ),
           ],
         ),
@@ -909,10 +979,6 @@ class _ListaMonedasState extends State<ListaMonedas> {
           print('Moneda guardada en Firestore con id: ${docRef.id}');
         }
       }
-
-      print('=== Recargando lista desde Firestore ===');
-      await _cargarMonedas(); // Recarga completa desde Firestore
-      print('=== Lista recargada ===');
     }
   }
 }
