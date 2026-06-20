@@ -167,6 +167,84 @@ class _PantallaAuthState extends State<PantallaAuth> {
     }
   }
 
+  Future<void> _mostrarDialogoRestablecer() async {
+    final emailController = TextEditingController(
+      text: _emailController.text, // precargar el email actual si existe
+    );
+
+    return showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: const Text('Restablecer contraseña'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              'Te enviaremos un enlace a tu correo para restablecer tu contraseña.',
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: emailController,
+              decoration: const InputDecoration(
+                labelText: 'Correo electrónico',
+                hintText: 'tu@correo.com',
+                border: OutlineInputBorder(),
+              ),
+              keyboardType: TextInputType.emailAddress,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              final email = emailController.text.trim();
+              if (email.isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Ingresa tu correo electrónico.')),
+                );
+                return;
+              }
+              try {
+                await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
+                if (mounted) Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Correo de restablecimiento enviado. Revisa tu bandeja de entrada.'),
+                    backgroundColor: Colors.green,
+                  ),
+                );
+              } on FirebaseAuthException catch (e) {
+                String mensaje;
+                switch (e.code) {
+                  case 'user-not-found':
+                    mensaje = 'No existe una cuenta con ese correo electrónico.';
+                    break;
+                  case 'invalid-email':
+                    mensaje = 'El correo electrónico no es válido.';
+                    break;
+                  default:
+                    mensaje = 'Error: ${e.message}';
+                }
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(mensaje),
+                    backgroundColor: Theme.of(context).colorScheme.error,
+                  ),
+                );
+              }
+            },
+            child: const Text('Enviar'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -245,7 +323,7 @@ class _PantallaAuthState extends State<PantallaAuth> {
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
                       TextButton(
-                        onPressed: () {},
+                        onPressed: _mostrarDialogoRestablecer,
                         child: const Text('¿Olvidaste tu contraseña?'),
                       ),
                     ],
