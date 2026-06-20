@@ -50,6 +50,11 @@
 - Al elegir "Seguir como invitado" → crea usuario anónimo y navega a ListaMonedas.
 - Al registrar/iniciar sesión con email o Google → vincula cuenta anónima si existe, o crea nueva.
 - Al cerrar sesión → vuelve a PantallaAuth.
+  ## Recuperación de contraseña
+- Desde la pantalla de login, el usuario puede tocar el enlace "¿Olvidaste tu contraseña?".
+- Se abre un diálogo donde debe ingresar su correo electrónico.
+- Al enviar, Firebase envía un correo con un enlace para restablecer la contraseña.
+- Se muestran mensajes de éxito o error según el resultado.
 
 ## Exportar / Importar colección (desde el perfil)
 
@@ -126,10 +131,10 @@
 - **Botones**: "Cancelar" (texto) y "Continuar →" (primario) en la misma fila.
 
   ## Lista de colección (actualización en tiempo real)
-- La lista de monedas ahora usa `StreamBuilder` para escuchar cambios en Firestore.
-- Cualquier modificación (importación, edición, eliminación, adición) se refleja automáticamente sin necesidad de recargar la app.
-- Los filtros (búsqueda, tipo, rango de años, composición) se aplican sobre los datos en tiempo real.
-- Se eliminó la dependencia de Hive para la lista principal (ahora solo se usa Firestore como fuente de verdad).
+  - La lista de monedas ahora usa `StreamBuilder` para escuchar cambios en Firestore.
+  - Cualquier modificación (importación, edición, eliminación, adición) se refleja automáticamente sin necesidad de recargar la app.
+  - Los filtros (búsqueda, tipo, rango de años, composición) se aplican sobre los datos en tiempo real.
+  - Se eliminó la dependencia de Hive para la lista principal (ahora solo se usa Firestore como fuente de verdad).
 
 ## Formulario de datos opcionales (pantalla completa)
 - **Subtítulo**: "Puedes completarlo más adelante".
@@ -171,14 +176,21 @@
 
 Accesible desde la tercera pestaña del menú inferior (icono de gráfico).
 
-### Datos mostrados
-- **Tarjetas resumen**: Total de piezas, países únicos, cantidad de monedas y billetes.
-- **Gráfico de tarta**: Distribución entre monedas y billetes.
-- **Gráfico de barras (Top 5 países)**: Países con mayor número de piezas en la colección.
-- **Gráfico de barras (distribución por década)**: Agrupación de piezas por década (ej. 1940, 1950, 1960...).
+  ### Datos mostrados
+  - **Tarjetas resumen**: Total de piezas, países únicos, cantidad de monedas y billetes.
+  - **Gráfico de tarta**: Distribución entre monedas y billetes.
+  - **Gráfico de barras (Top 5 países)**: Países con mayor número de piezas en la colección.
+  - **Gráfico de barras (distribución por década)**: Agrupación de piezas por década (ej. 1940, 1950, 1960...).
 
-### Comportamiento
-- Los datos se cargan directamente desde Firestore al abrir la pestaña.
-- La vista se actualiza automáticamente al agregar, editar o eliminar piezas (gracias a `StreamBuilder`).
-- Si no hay datos, se muestra un mensaje informativo.
-- Los gráficos usan los colores del tema (primario, secundario, terracota) y se adaptan al modo oscuro.
+  ### Comportamiento
+  - Los datos se cargan directamente desde Firestore al abrir la pestaña.
+  - La vista se actualiza automáticamente al agregar, editar o eliminar piezas (gracias a `StreamBuilder`).
+  - Si no hay datos, se muestra un mensaje informativo.
+  - Los gráficos usan los colores del tema (primario, secundario, terracota) y se adaptan al modo oscuro.
+
+  ## Mejoras visuales
+  - **Escala numérica en eje Y**: Se agregó una escala numérica en el eje izquierdo para que el usuario pueda leer fácilmente la cantidad de piezas representada por cada barra.
+  - **Nombres de países en eje X**: Los nombres de los países se muestran debajo de las barras, con capitalización automática (primera letra mayúscula) y normalización de texto para agrupar correctamente variaciones ortográficas (mayúsculas, minúsculas, tildes, espacios, caracteres especiales).
+  - **Eje X limpio para décadas**: En el gráfico de distribución por décadas, solo se muestra el año de la década (sin números redundantes). La cantidad se lee en el eje Y.
+  - **Agrupación de países**: Los países se normalizan y agrupan, evitando duplicados por diferencias de escritura. El nombre mostrado se capitaliza automáticamente.
+

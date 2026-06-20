@@ -16,14 +16,53 @@ class PantallaEstadisticas extends StatelessWidget {
       );
     }
 
-    final Stream<QuerySnapshot> stream = FirebaseFirestore.instance
-        .collection('usuarios')
-        .doc(user.uid)
-        .collection('monedas')
-        .snapshots();
+    String _normalizarTexto(String texto) {
+      // Convertir a minúsculas
+      String normalizado = texto.toLowerCase().trim();
+
+      // Eliminar tildes
+      final Map<String, String> reemplazos = {
+        'á': 'a',
+        'é': 'e',
+        'í': 'i',
+        'ó': 'o',
+        'ú': 'u',
+        'Á': 'a',
+        'É': 'e',
+        'Í': 'i',
+        'Ó': 'o',
+        'Ú': 'u',
+      };
+      normalizado =
+          normalizado.split('').map((char) {
+            return reemplazos[char] ?? char;
+          }).join();
+
+      // Eliminar caracteres especiales (puntos, comas, paréntesis, etc.)
+      normalizado = normalizado.replaceAll(RegExp(r'[^a-z0-9 ]'), '');
+
+      // Eliminar espacios múltiples y al inicio/final
+      normalizado = normalizado.replaceAll(RegExp(r'\s+'), ' ').trim();
+
+      return normalizado;
+    }
+
+    String _capitalizar(String texto) {
+      final textoNormalizado = _normalizarTexto(texto);
+      if (textoNormalizado.isEmpty) return textoNormalizado;
+      return textoNormalizado[0].toUpperCase() + textoNormalizado.substring(1).toLowerCase();
+    }
+
+    Map<String, String> _nombreOriginalPais = {};
+
+    final Stream<QuerySnapshot> stream =
+        FirebaseFirestore.instance
+            .collection('usuarios')
+            .doc(user.uid)
+            .collection('monedas')
+            .snapshots();
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Estadísticas')),
       body: StreamBuilder<QuerySnapshot>(
         stream: stream,
         builder: (context, snapshot) {
@@ -47,27 +86,49 @@ class PantallaEstadisticas extends StatelessWidget {
             );
           }
 
-          final List<Map<String, String>> monedas = snapshot.data!.docs.map((doc) {
-            final data = doc.data() as Map<String, dynamic>;
-            final moneda = Map<String, String>.from(data);
-            moneda['_id'] = doc.id;
-            return moneda;
-          }).toList();
+          final List<Map<String, String>> monedas =
+              snapshot.data!.docs.map((doc) {
+                final data = doc.data() as Map<String, dynamic>;
+                final moneda = Map<String, String>.from(data);
+                moneda['_id'] = doc.id;
+                return moneda;
+              }).toList();
 
           final totalPiezas = monedas.length;
-          final totalMonedas = monedas.where((m) => m['tipo'] == 'moneda').length;
-          final totalBilletes = monedas.where((m) => m['tipo'] == 'billete').length;
+          final totalMonedas =
+              monedas.where((m) => m['tipo'] == 'moneda').length;
+          final totalBilletes =
+              monedas.where((m) => m['tipo'] == 'billete').length;
 
-          final paises = monedas.map((m) => m['pais'] ?? '').where((p) => p.isNotEmpty).toSet();
+          final paises =
+              monedas
+                  .map((m) => m['pais'] ?? '')
+                  .where((p) => p.isNotEmpty)
+                  .toSet();
           final totalPaises = paises.length;
 
           final Map<String, int> conteoPais = {};
+          _nombreOriginalPais = {};
           for (var moneda in monedas) {
-            final pais = moneda['pais'] ?? 'Desconocido';
-            conteoPais[pais] = (conteoPais[pais] ?? 0) + 1;
+            final paisRaw = moneda['pais'] ?? 'Desconocido';
+            final paisNormalizado = _normalizarTexto(paisRaw);
+            // Guardar el primer nombre original que aparece para cada normalizado
+            if (!_nombreOriginalPais.containsKey(paisNormalizado)) {
+              _nombreOriginalPais[paisNormalizado] = paisRaw;
+            }
+            conteoPais[paisNormalizado] =
+                (conteoPais[paisNormalizado] ?? 0) + 1;
           }
-          final sortedPaises = conteoPais.entries.toList()..sort((a, b) => b.value.compareTo(a.value));
-          final topPaises = Map.fromEntries(sortedPaises.take(5));
+          final sortedPaises =
+              conteoPais.entries.toList()
+                ..sort((a, b) => b.value.compareTo(a.value));
+          final topPaises = <String, int>{};
+          for (var entry in sortedPaises.take(5)) {
+            // Mostrar el nombre original (el primero que apareció)
+            final nombreOriginal = _nombreOriginalPais[entry.key] ?? entry.key;
+            final nombreCapitalizado = _capitalizar(nombreOriginal);
+            topPaises[nombreCapitalizado] = entry.value;
+          }
 
           final Map<int, int> conteoAnio = {};
           for (var moneda in monedas) {
@@ -86,17 +147,33 @@ class PantallaEstadisticas extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    _buildResumenCard('Total piezas', '$totalPiezas', Theme.of(context).colorScheme.primary),
+                    _buildResumenCard(
+                      'Total piezas',
+                      '$totalPiezas',
+                      Theme.of(context).colorScheme.primary,
+                    ),
                     const SizedBox(width: 12),
-                    _buildResumenCard('Países', '$totalPaises', Theme.of(context).colorScheme.onSurfaceVariant),
+                    _buildResumenCard(
+                      'Países',
+                      '$totalPaises',
+                      Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
                   ],
                 ),
                 const SizedBox(height: 12),
                 Row(
                   children: [
-                    _buildResumenCard('Monedas', '$totalMonedas', Theme.of(context).colorScheme.tertiary ?? Colors.orange),
+                    _buildResumenCard(
+                      'Monedas',
+                      '$totalMonedas',
+                      Theme.of(context).colorScheme.tertiary ?? Colors.orange,
+                    ),
                     const SizedBox(width: 12),
-                    _buildResumenCard('Billetes', '$totalBilletes', Colors.green),
+                    _buildResumenCard(
+                      'Billetes',
+                      '$totalBilletes',
+                      Colors.green,
+                    ),
                   ],
                 ),
                 const SizedBox(height: 24),
@@ -158,10 +235,7 @@ class PantallaEstadisticas extends StatelessWidget {
               const SizedBox(height: 4),
               Text(
                 label,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey.shade600,
-                ),
+                style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
               ),
             ],
           ),
@@ -170,63 +244,93 @@ class PantallaEstadisticas extends StatelessWidget {
     );
   }
 
-  Widget _buildPieChartTipo(BuildContext context, int totalMonedas, int totalBilletes) {
+  Widget _buildPieChartTipo(
+    BuildContext context,
+    int totalMonedas,
+    int totalBilletes,
+  ) {
     final data = [
       PieChartSectionData(
         value: totalMonedas.toDouble(),
         color: Color(0xFFC9A03D),
         title: 'Monedas',
         radius: 50,
-        titleStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white),
+        titleStyle: const TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.bold,
+          color: Colors.white,
+        ),
       ),
       PieChartSectionData(
         value: totalBilletes.toDouble(),
         color: Colors.green,
         title: 'Billetes',
         radius: 50,
-        titleStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white),
+        titleStyle: const TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.bold,
+          color: Colors.white,
+        ),
       ),
     ];
 
     return SizedBox(
       height: 200,
       child: PieChart(
-        PieChartData(
-          sections: data,
-          sectionsSpace: 4,
-          centerSpaceRadius: 20,
-        ),
+        PieChartData(sections: data, sectionsSpace: 4, centerSpaceRadius: 20),
       ),
     );
   }
 
-  Widget _buildBarChartPaises(BuildContext context, Map<String, int> data) {
-    final entries = data.entries.toList();
+  Widget _buildBarChartPaises(
+    BuildContext context,
+    Map<String, int> topPaises,
+  ) {
+    final entries = topPaises.entries.toList();
     if (entries.isEmpty) return const SizedBox.shrink();
-    final maxValue = entries.map((e) => e.value).reduce((a, b) => a > b ? a : b).toDouble();
+
+    final maxValue =
+        entries.map((e) => e.value).reduce((a, b) => a > b ? a : b).toDouble();
 
     return SizedBox(
-      height: 200,
+      height: 250,
       child: BarChart(
         BarChartData(
           alignment: BarChartAlignment.spaceAround,
-          maxY: maxValue + 1,
-          barGroups: entries.asMap().entries.map((entry) {
-            final index = entry.key;
-            final item = entry.value;
-            return BarChartGroupData(
-              x: index,
-              barRods: [
-                BarChartRodData(
-                  toY: item.value.toDouble(),
-                  color: Theme.of(context).colorScheme.primary,
-                  width: 20,
-                  borderRadius: BorderRadius.circular(4),
-                ),
-              ],
-            );
-          }).toList(),
+          maxY: maxValue + 2,
+          barGroups:
+              entries.asMap().entries.map((entry) {
+                final index = entry.key;
+                final item = entry.value;
+                return BarChartGroupData(
+                  x: index,
+                  barRods: [
+                    BarChartRodData(
+                      toY: item.value.toDouble(),
+                      color: Theme.of(context).colorScheme.primary,
+                      width: 20,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ],
+                );
+              }).toList(),
           titlesData: FlTitlesData(
+            leftTitles: AxisTitles(
+              sideTitles: SideTitles(
+                showTitles: true,
+                reservedSize: 30,
+                getTitlesWidget: (value, meta) {
+                  // Mostrar solo números enteros (sin decimales)
+                  if (value % 1 == 0) {
+                    return Text(
+                      value.toInt().toString(),
+                      style: const TextStyle(fontSize: 12),
+                    );
+                  }
+                  return const Text('');
+                },
+              ),
+            ),
             bottomTitles: AxisTitles(
               sideTitles: SideTitles(
                 showTitles: true,
@@ -243,52 +347,63 @@ class PantallaEstadisticas extends StatelessWidget {
                   }
                   return const Text('');
                 },
+                reservedSize: 40,
               ),
             ),
-            leftTitles: AxisTitles(
-              sideTitles: SideTitles(showTitles: false),
-            ),
-            topTitles: AxisTitles(
-              sideTitles: SideTitles(showTitles: false),
-            ),
-            rightTitles: AxisTitles(
-              sideTitles: SideTitles(showTitles: false),
-            ),
+            topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
           ),
-          gridData: FlGridData(show: false),
-          borderData: FlBorderData(show: false),
         ),
       ),
     );
   }
 
-  Widget _buildBarChartAnios(BuildContext context, Map<int, int> data) {
-    final entries = data.entries.toList()..sort((a, b) => a.key.compareTo(b.key));
+  Widget _buildBarChartAnios(BuildContext context, Map<int, int> topAnios) {
+    final entries =
+        topAnios.entries.toList()..sort((a, b) => a.key.compareTo(b.key));
     if (entries.isEmpty) return const SizedBox.shrink();
-    final maxValue = entries.map((e) => e.value).reduce((a, b) => a > b ? a : b).toDouble();
+
+    final maxValue =
+        entries.map((e) => e.value).reduce((a, b) => a > b ? a : b).toDouble();
 
     return SizedBox(
-      height: 200,
+      height: 220,
       child: BarChart(
         BarChartData(
           alignment: BarChartAlignment.spaceAround,
-          maxY: maxValue + 1,
-          barGroups: entries.asMap().entries.map((entry) {
-            final index = entry.key;
-            final item = entry.value;
-            return BarChartGroupData(
-              x: index,
-              barRods: [
-                BarChartRodData(
-                  toY: item.value.toDouble(),
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  width: 20,
-                  borderRadius: BorderRadius.circular(4),
-                ),
-              ],
-            );
-          }).toList(),
+          maxY: maxValue + 3,
+          barGroups:
+              entries.asMap().entries.map((entry) {
+                final index = entry.key;
+                final item = entry.value;
+                return BarChartGroupData(
+                  x: index,
+                  barRods: [
+                    BarChartRodData(
+                      toY: item.value.toDouble(),
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      width: 20,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ],
+                );
+              }).toList(),
           titlesData: FlTitlesData(
+            leftTitles: AxisTitles(
+              sideTitles: SideTitles(
+                showTitles: true,
+                reservedSize: 30,
+                getTitlesWidget: (value, meta) {
+                  if (value % 1 == 0) {
+                    return Text(
+                      value.toInt().toString(),
+                      style: const TextStyle(fontSize: 12),
+                    );
+                  }
+                  return const Text('');
+                },
+              ),
+            ),
             bottomTitles: AxisTitles(
               sideTitles: SideTitles(
                 showTitles: true,
@@ -297,28 +412,24 @@ class PantallaEstadisticas extends StatelessWidget {
                   if (index >= 0 && index < entries.length) {
                     return Padding(
                       padding: const EdgeInsets.only(top: 8),
-                      child: Text(
-                        '${entries[index].key}',
-                        style: const TextStyle(fontSize: 12),
+                      child: Column(
+                        children: [
+                          Text(
+                            '${entries[index].key}',
+                            style: const TextStyle(fontSize: 12),
+                          ),
+                        ],
                       ),
                     );
                   }
                   return const Text('');
                 },
+                reservedSize: 50,
               ),
             ),
-            leftTitles: AxisTitles(
-              sideTitles: SideTitles(showTitles: false),
-            ),
-            topTitles: AxisTitles(
-              sideTitles: SideTitles(showTitles: false),
-            ),
-            rightTitles: AxisTitles(
-              sideTitles: SideTitles(showTitles: false),
-            ),
+            topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
           ),
-          gridData: FlGridData(show: false),
-          borderData: FlBorderData(show: false),
         ),
       ),
     );

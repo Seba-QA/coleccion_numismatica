@@ -121,6 +121,22 @@
 - **Fecha**: 19/06/2026
 - **Motivo**: El selector manual causaba errores transitorios de `unmounted` al reconstruir `MaterialApp`. En lugar de parchear el error, se optó por simplificar y usar el tema del sistema (`ThemeMode.system`), que ya funcionaba correctamente.
 
+## Decisión: Migrar lista de colección a `StreamBuilder` para actualización en tiempo real
+- **Fecha**: 19/06/2026
+- **Motivo**: La lista no se actualizaba tras importar datos o realizar cambios. Se necesitaba sincronización automática con Firestore.
+
+## Decisión: Implementar recuperación de contraseña
+- **Fecha**: 19/06/2026
+- **Motivo**: Permitir al usuario restablecer su contraseña si la olvida.
+
+## Decisión: Normalizar y capitalizar nombres de países en estadísticas
+- **Fecha**: 20/06/2026
+- **Motivo**: El campo "país" es texto libre y el usuario puede ingresar variaciones (mayúsculas, tildes, espacios, puntos). Esto fragmentaba los datos en el gráfico de países.
+
+## Decisión: Mejorar legibilidad de gráficos de barras
+- **Fecha**: 20/06/2026
+- **Motivo**: Los gráficos de barras no mostraban valores numéricos claros y tenían redundancia de información.
+
 Ahora que el login y perfil están funcionando, el usuario puede registrarse y vincular su cuenta anónima. Esto completa una de las tareas más importantes. Vamos a actualizar la documentación y luego definir los próximos pasos.
 
 ## Problemas resueltos
