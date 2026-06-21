@@ -137,6 +137,16 @@
 - **Fecha**: 20/06/2026
 - **Motivo**: Los gráficos de barras no mostraban valores numéricos claros y tenían redundancia de información.
 
+## Decisión: Extraer lógica de edición a función reutilizable
+- **Fecha**: 21/06/2026
+- **Motivo**: Evitar duplicar código y permitir que la edición se dispare desde múltiples lugares (lista y detalle).
+
+## Decisión: Permitir edición desde la pantalla de detalle
+- **Fecha**: 21/06/2026
+- **Motivo**: Mejorar la experiencia de usuario permitiendo editar una pieza directamente desde su vista de detalle, sin necesidad de volver a la lista.
+- **Problema conocido**: Al abrir el formulario desde el detalle, este se muestra sobre la lista de colección en lugar de sobre el detalle. Se corregirá en la próxima sesión (usando `showDialog` en el contexto correcto o una ruta de navegación separada).
+- **Solución planificada**: Mantener el detalle abierto mientras se edita (abrir el diálogo sobre el detalle) o, alternativamente, usar una ruta de navegación separada para la edición.
+
 Ahora que el login y perfil están funcionando, el usuario puede registrarse y vincular su cuenta anónima. Esto completa una de las tareas más importantes. Vamos a actualizar la documentación y luego definir los próximos pasos.
 
 ## Problemas resueltos
@@ -159,6 +169,8 @@ Ahora que el login y perfil están funcionando, el usuario puede registrarse y v
 17. Conflictos de nulabilidad en `_composicionQuery` resueltos usando `String` no nullable con valor inicial vacío.
 18. Se eliminó código redundante que mezclaba `DropdownButton` con `TextField`.
 19. Tras la limpieza de estilos inline, se perdió el borde visual que indicaba el área del selector. Se restauró en `selector_imagen.dart` con `BoxDecoration(border: Border.all(color: Colors.grey), borderRadius: BorderRadius.circular(8))`.
+20. Se corrigió el tipo de `onEditar` de `VoidCallback?` a `void Function(Map<String, String>)?` para que coincida con `_editarDesdeDetalle`.
+21. Se usó `WidgetsBinding.instance.addPostFrameCallback` para asegurar que el detalle se cierre antes de abrir el diálogo de edición.
 
 
 ## Pendientes para próxima sesión

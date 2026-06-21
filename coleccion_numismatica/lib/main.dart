@@ -340,6 +340,10 @@ class _ListaMonedasState extends State<ListaMonedas> {
     setState(() {});
   }
 
+  void _editarDesdeDetalle(Map<String, String> moneda) {
+    _mostrarFormulario(monedaEditada: moneda);
+  }
+
   List<Map<String, String>> _filtrarLista(
     List<Map<String, String>> listaCompleta,
   ) {
@@ -623,7 +627,10 @@ class _ListaMonedasState extends State<ListaMonedas> {
                             context,
                             MaterialPageRoute(
                               builder:
-                                  (context) => DetalleMoneda(moneda: moneda),
+                                  (context) => DetalleMoneda(
+                                    moneda: moneda,
+                                    onEditar: _editarDesdeDetalle,
+                                  ),
                             ),
                           );
                         },

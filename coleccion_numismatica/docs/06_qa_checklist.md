@@ -185,7 +185,10 @@
 - [ ] El modo oscuro se aplica correctamente a todos los elementos.
 - [ ] No hay desbordamiento (overflow) en la pantalla.
 - [ ] El botón de editar en el AppBar está presente (aunque aún sin funcionalidad completa).
-
+- [ ] Al tocar el lápiz en la pantalla de detalle, se cierra el detalle y se abre el formulario de edición.
+- [ ] El formulario de edición carga correctamente los datos de la pieza.
+- [ ] Al guardar los cambios, la pieza se actualiza en Firestore y la lista se refresca automáticamente.
+- [ ] La edición desde la lista (lápiz en tarjeta) sigue funcionando correctamente.
 ---
 
 ## 10. Pruebas de tema visual (claro/oscuro)

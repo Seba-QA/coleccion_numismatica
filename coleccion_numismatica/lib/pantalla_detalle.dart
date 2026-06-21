@@ -3,8 +3,9 @@ import 'package:flutter/material.dart';
 
 class DetalleMoneda extends StatefulWidget {
   final Map<String, String> moneda;
+  final void Function(Map<String, String>)? onEditar;
 
-  const DetalleMoneda({super.key, required this.moneda});
+  const DetalleMoneda({super.key, required this.moneda, this.onEditar});
 
   @override
   State<DetalleMoneda> createState() => _DetalleMonedaState();
@@ -39,13 +40,21 @@ class _DetalleMonedaState extends State<DetalleMoneda>
           IconButton(
             icon: const Icon(Icons.edit),
             onPressed: () {
-              // TODO: Implementar edición desde detalle
-              // Por ahora solo muestra un mensaje
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Edición desde detalle (próximamente)'),
-                ),
-              );
+              if (widget.onEditar != null) {
+                //print('Ingreso a editar');
+                final moneda = widget.moneda;
+                Navigator.pop(context);
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  widget.onEditar!(moneda);
+                });
+              } else {
+                // Fallback si no hay callback (no debería ocurrir)
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('No se puede editar desde aquí'),
+                  ),
+                );
+              }
             },
           ),
         ],
@@ -55,8 +64,7 @@ class _DetalleMonedaState extends State<DetalleMoneda>
           Padding(
             padding: const EdgeInsets.all(16),
             child: Row(
-              crossAxisAlignment:
-                  CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _buildMiniatura(
                   '',
@@ -99,10 +107,7 @@ class _DetalleMonedaState extends State<DetalleMoneda>
             labelColor: colorScheme.primary,
             unselectedLabelColor: colorScheme.onSurface.withOpacity(0.6),
             indicatorColor: colorScheme.primary,
-            tabs: const [
-              Tab(text: 'General'),
-              Tab(text: 'Físicas'),
-            ],
+            tabs: const [Tab(text: 'General'), Tab(text: 'Físicas')],
           ),
 
           // TabBarView
