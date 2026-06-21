@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:path_provider/path_provider.dart' as path_provider;
 import 'formulario_opcional.dart';
-import 'detalle_moneda.dart';
+import 'pantalla_detalle.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -404,7 +404,7 @@ class _ListaMonedasState extends State<ListaMonedas> {
               child: TextField(
                 controller: _searchController,
                 decoration: InputDecoration(
-                  hintText: 'Buscar por país, denominación o año...',
+                  hintText: 'Buscar por país, denominación o año',
                   prefixIcon: const Icon(Icons.search),
                   suffixIcon:
                       _searchQuery.isNotEmpty
@@ -443,6 +443,7 @@ class _ListaMonedasState extends State<ListaMonedas> {
                       });
                       _refrescarFiltros();
                     },
+                    selectedColor: Theme.of(context).colorScheme.primary,
                   ),
                   const SizedBox(width: 8),
                   ChoiceChip(
@@ -454,6 +455,7 @@ class _ListaMonedasState extends State<ListaMonedas> {
                       });
                       _refrescarFiltros();
                     },
+                    selectedColor: Theme.of(context).colorScheme.primary,
                   ),
                   const SizedBox(width: 8),
                   ChoiceChip(
@@ -465,6 +467,7 @@ class _ListaMonedasState extends State<ListaMonedas> {
                       });
                       _refrescarFiltros();
                     },
+                    selectedColor: Theme.of(context).colorScheme.primary,
                   ),
                 ],
               ),

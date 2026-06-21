@@ -8,16 +8,13 @@ import 'package:file_picker/file_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'servicio_auth.dart';
 import 'pantalla_auth.dart';
+import 'pantalla_estadisticas.dart';
 
 class PantallaPerfil extends StatefulWidget {
   final List<Map<String, String>>? monedas;
   final VoidCallback? onDatosCambiados;
 
-  const PantallaPerfil({
-    super.key,
-    this.monedas,
-    this.onDatosCambiados,
-  });
+  const PantallaPerfil({super.key, this.monedas, this.onDatosCambiados});
 
   @override
   State<PantallaPerfil> createState() => _PantallaPerfilState();
@@ -38,13 +35,13 @@ class _PantallaPerfilState extends State<PantallaPerfil> {
     try {
       final jsonData = jsonEncode(widget.monedas);
       final tempDir = await getTemporaryDirectory();
-      final fileName = 'coleccion_${DateTime.now().millisecondsSinceEpoch}.json';
+      final fileName =
+          'coleccion_${DateTime.now().millisecondsSinceEpoch}.json';
       final file = File('${tempDir.path}/$fileName');
       await file.writeAsString(jsonData);
-      await Share.shareXFiles(
-        [XFile(file.path)],
-        text: 'Mi colección numismática',
-      );
+      await Share.shareXFiles([
+        XFile(file.path),
+      ], text: 'Mi colección numismática');
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Error al exportar los datos')),
@@ -55,11 +52,12 @@ class _PantallaPerfilState extends State<PantallaPerfil> {
   Future<List<Map<String, String>>> _obtenerMonedasDeFirestore() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return [];
-    final snapshot = await FirebaseFirestore.instance
-        .collection('usuarios')
-        .doc(user.uid)
-        .collection('monedas')
-        .get();
+    final snapshot =
+        await FirebaseFirestore.instance
+            .collection('usuarios')
+            .doc(user.uid)
+            .collection('monedas')
+            .get();
     final List<Map<String, String>> lista = [];
     for (var doc in snapshot.docs) {
       final data = doc.data() as Map<String, dynamic>;
@@ -81,30 +79,34 @@ class _PantallaPerfilState extends State<PantallaPerfil> {
       final file = File(result.files.single.path!);
       final contenido = await file.readAsString();
       final List<dynamic> importedList = jsonDecode(contenido);
-      final List<Map<String, String>> nuevasMonedas = importedList
-          .map((e) => Map<String, String>.from(e as Map<dynamic, dynamic>))
-          .toList();
+      final List<Map<String, String>> nuevasMonedas =
+          importedList
+              .map((e) => Map<String, String>.from(e as Map<dynamic, dynamic>))
+              .toList();
 
       final opcion = await showDialog<String>(
         context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Importar datos'),
-          content: const Text('¿Cómo deseas combinar los datos importados con tu colección actual?'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context, 'reemplazar'),
-              child: const Text('Reemplazar'),
+        builder:
+            (context) => AlertDialog(
+              title: const Text('Importar datos'),
+              content: const Text(
+                '¿Cómo deseas combinar los datos importados con tu colección actual?',
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context, 'reemplazar'),
+                  child: const Text('Reemplazar'),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.pop(context, 'fusionar'),
+                  child: const Text('Fusionar'),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.pop(context, 'cancelar'),
+                  child: const Text('Cancelar'),
+                ),
+              ],
             ),
-            TextButton(
-              onPressed: () => Navigator.pop(context, 'fusionar'),
-              child: const Text('Fusionar'),
-            ),
-            TextButton(
-              onPressed: () => Navigator.pop(context, 'cancelar'),
-              child: const Text('Cancelar'),
-            ),
-          ],
-        ),
       );
 
       if (opcion == 'cancelar' || opcion == null) return;
@@ -136,11 +138,13 @@ class _PantallaPerfilState extends State<PantallaPerfil> {
         final Set<String> clavesExistentes = {};
         for (var doc in snapshot.docs) {
           final data = doc.data();
-          final clave = '${data['pais']}_${data['denominacion']}_${data['anio']}';
+          final clave =
+              '${data['pais']}_${data['denominacion']}_${data['anio']}';
           clavesExistentes.add(clave);
         }
         for (var moneda in nuevasMonedas) {
-          final clave = '${moneda['pais']}_${moneda['denominacion']}_${moneda['anio']}';
+          final clave =
+              '${moneda['pais']}_${moneda['denominacion']}_${moneda['anio']}';
           if (!clavesExistentes.contains(clave)) {
             await collectionRef.add(moneda);
           }
@@ -158,7 +162,9 @@ class _PantallaPerfilState extends State<PantallaPerfil> {
     } catch (e) {
       print('Error en importación: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Error al importar los datos. Archivo inválido.')),
+        const SnackBar(
+          content: Text('Error al importar los datos. Archivo inválido.'),
+        ),
       );
     }
   }
@@ -171,7 +177,8 @@ class _PantallaPerfilState extends State<PantallaPerfil> {
   // ---------- Funciones auxiliares ----------
   String _obtenerMetodoAutenticacion() {
     if (_user.isAnonymous) return 'anonimo';
-    if (_user.providerData.isNotEmpty) return _user.providerData.first.providerId;
+    if (_user.providerData.isNotEmpty)
+      return _user.providerData.first.providerId;
     return 'desconocido';
   }
 
@@ -206,7 +213,8 @@ class _PantallaPerfilState extends State<PantallaPerfil> {
   int get _totalPaises {
     final lista = widget.monedas;
     if (lista == null || lista.isEmpty) return 0;
-    final paises = lista.map((m) => m['pais'] ?? '').where((p) => p.isNotEmpty).toSet();
+    final paises =
+        lista.map((m) => m['pais'] ?? '').where((p) => p.isNotEmpty).toSet();
     return paises.length;
   }
 
@@ -265,11 +273,7 @@ class _PantallaPerfilState extends State<PantallaPerfil> {
             ),
 
             // ---------- TARJETAS DE INFORMACIÓN ----------
-            _buildInfoCard(
-              icon: Icons.email,
-              title: 'CORREO',
-              subtitle: email,
-            ),
+            _buildInfoCard(icon: Icons.email, title: 'CORREO', subtitle: email),
             _buildInfoCard(
               icon: Icons.security,
               title: 'AUTENTICACIÓN',
@@ -316,7 +320,10 @@ class _PantallaPerfilState extends State<PantallaPerfil> {
                   padding: const EdgeInsets.all(12),
                   child: Row(
                     children: [
-                      const Icon(Icons.warning_amber_rounded, color: Colors.amber),
+                      const Icon(
+                        Icons.warning_amber_rounded,
+                        color: Colors.amber,
+                      ),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
@@ -336,7 +343,9 @@ class _PantallaPerfilState extends State<PantallaPerfil> {
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (_) => const PantallaAuth(isLinking: true)),
+                    MaterialPageRoute(
+                      builder: (_) => const PantallaAuth(isLinking: true),
+                    ),
                   );
                 },
               ),
@@ -365,17 +374,11 @@ class _PantallaPerfilState extends State<PantallaPerfil> {
       children: [
         Text(
           value,
-          style: const TextStyle(
-            fontSize: 22,
-            fontWeight: FontWeight.bold,
-          ),
+          style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
         ),
         Text(
           label,
-          style: TextStyle(
-            fontSize: 14,
-            color: Colors.grey.shade600,
-          ),
+          style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
         ),
       ],
     );
@@ -411,10 +414,7 @@ class _PantallaPerfilState extends State<PantallaPerfil> {
                     ),
                   ),
                   const SizedBox(height: 2),
-                  Text(
-                    subtitle,
-                    style: const TextStyle(fontSize: 16),
-                  ),
+                  Text(subtitle, style: const TextStyle(fontSize: 16)),
                 ],
               ),
             ),
@@ -431,7 +431,8 @@ class _PantallaPerfilState extends State<PantallaPerfil> {
     required VoidCallback onTap,
     bool isDestructive = false,
   }) {
-    final color = isDestructive ? Colors.red : Theme.of(context).colorScheme.primary;
+    final color =
+        isDestructive ? Colors.red : Theme.of(context).colorScheme.primary;
     return Card(
       elevation: 0,
       shape: RoundedRectangleBorder(

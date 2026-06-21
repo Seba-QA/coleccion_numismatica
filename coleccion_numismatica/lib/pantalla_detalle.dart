@@ -56,7 +56,7 @@ class _DetalleMonedaState extends State<DetalleMoneda>
             padding: const EdgeInsets.all(16),
             child: Row(
               crossAxisAlignment:
-                  CrossAxisAlignment.start, // ← Alineación superior
+                  CrossAxisAlignment.start,
               children: [
                 _buildMiniatura(
                   '',
@@ -102,7 +102,6 @@ class _DetalleMonedaState extends State<DetalleMoneda>
             tabs: const [
               Tab(text: 'General'),
               Tab(text: 'Físicas'),
-              Tab(text: 'Adicional'),
             ],
           ),
 
@@ -137,24 +136,20 @@ class _DetalleMonedaState extends State<DetalleMoneda>
     double ancho;
 
     if (circular) {
-      // Si es circular, siempre cuadrado
       final double size = expand ? (esMoneda ? 120.0 : 80.0) : 80.0;
       alto = size;
       ancho = size;
     } else {
-      // No circular: rectangular
       if (expand) {
-        // En fila de miniaturas: alto fijo, ancho expandido
         alto = esMoneda ? 120.0 : 80.0;
         ancho = double.infinity;
       } else {
-        // En cabecera: tamaños fijos diferenciados
         if (esMoneda) {
           alto = 120.0;
-          ancho = 120.0; // cuadrado para moneda
+          ancho = 120.0;
         } else {
           alto = 80.0;
-          ancho = 120.0; // rectangular para billete
+          ancho = 120.0;
         }
       }
     }
@@ -201,7 +196,7 @@ class _DetalleMonedaState extends State<DetalleMoneda>
     } else {
       imagenWidget = Center(
         child: Text(
-          'Sin $titulo',
+          'Sin imagen',
           style: TextStyle(color: Colors.grey.shade500),
         ),
       );
@@ -295,6 +290,7 @@ class _DetalleMonedaState extends State<DetalleMoneda>
       child: Align(
         alignment: Alignment.topCenter,
         child: _buildTabla([
+          _buildCampo('Tipo', moneda['tipo']),
           _buildCampo('Denominación', moneda['denominacion']),
           _buildCampo('País', moneda['pais']),
           _buildCampo('Año', moneda['anio']),
