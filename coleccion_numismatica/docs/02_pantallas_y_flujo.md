@@ -102,19 +102,32 @@
 
 ## Pantalla de detalle de moneda/billete (rediseñada)
 
-### Estructura general
-- **AppBar**: Título con la denominación de la pieza y un botón de editar (lápiz) que abrirá el formulario de edición (pendiente de implementar).
-- **Cabecera**:
-  - Miniatura del anverso a la izquierda (cuadrada para monedas, rectangular para billetes).
-  - Denominación en negrita (tamaño 28) y país · año debajo (tamaño 16), alineados a la izquierda.
-- **Miniaturas de fotos**: Anverso y reverso en una fila debajo de la cabecera, con formato cuadrado para monedas y rectangular para billetes.
-- **Pestañas**: Actualmente solo dos: **General** y **Físicas** (la pestaña "Adicional" está comentada para futura expansión; "Fotos" no se usa por ahora).
-  - **General**: Muestra denominación, país, año y cantidad.
-  - **Físicas**: Muestra composición, peso (g) y diámetro (mm) (solo visible para monedas; para billetes muestra un mensaje informativo).
-- **Modo oscuro**: Todos los colores se adaptan al tema del sistema.
-### Interacción
-- Al tocar una pieza en la lista, se abre esta pantalla de detalle.
-- El botón de editar (lápiz) en el AppBar está preparado para futura implementación (por ahora muestra un mensaje temporal).
+  ### Estructura general
+  - **AppBar**: Título con la denominación de la pieza y un botón de editar (lápiz) que abrirá el formulario de edición (pendiente de implementar).
+  - **Cabecera**:
+    - Miniatura del anverso a la izquierda (cuadrada para monedas, rectangular para billetes).
+    - Denominación en negrita (tamaño 28) y país · año debajo (tamaño 16), alineados a la izquierda.
+  - **Miniaturas de fotos**: Anverso y reverso en una fila debajo de la cabecera, con formato cuadrado para monedas y rectangular para billetes.
+  - **Pestañas**: Actualmente solo dos: **General** y **Físicas** (la pestaña "Adicional" está comentada para futura expansión; "Fotos" no se usa por ahora).
+    - **General**: Muestra denominación, país, año y cantidad.
+    - **Físicas**: Muestra composición, peso (g) y diámetro (mm) (solo visible para monedas; para billetes muestra un mensaje informativo).
+  - **Modo oscuro**: Todos los colores se adaptan al tema del sistema.
+  ### Interacción
+  - Al tocar una pieza en la lista, se abre esta pantalla de detalle.
+  - El botón de editar (lápiz) en el AppBar está preparado para futura implementación (por ahora muestra un mensaje temporal).
+
+  ## Edición desde la pantalla de detalle (mejora)
+  - El usuario puede editar una moneda o billete directamente desde su pantalla de detalle.
+  - Al tocar el ícono de lápiz (✏️) en el `AppBar` del detalle, se abre el formulario de edición **sin cerrar** la pantalla de detalle.
+  - El formulario se muestra como un diálogo sobre el detalle, manteniendo el contexto visual.
+  - Al guardar los cambios:
+    - Firestore se actualiza correctamente (usando el `_id` del documento, sin depender de índices).
+    - La pantalla de detalle se actualiza en tiempo real gracias a un `StreamBuilder` que escucha cambios en Firestore.
+  - La vista de detalle ya no se cierra al iniciar la edición, mejorando la experiencia de usuario.
+  ### Comportamiento técnico
+  - `PantallaDetalle` usa `StreamBuilder` para escuchar el documento específico de Firestore (basado en `monedaId`).
+  - El formulario de edición (`_mostrarFormulario`) se abre con la moneda actual, y al guardar, el `Stream` notifica el cambio y la UI se reconstruye automáticamente.
+  - Se corrigió el overflow al abrir el teclado durante la edición (`resizeToAvoidBottomInset: false`).
 
   ## Formulario de datos obligatorios (diálogo)
 - **Título**: "Nueva pieza".

@@ -1,24 +1,32 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
-class DetalleMoneda extends StatefulWidget {
-  final Map<String, String> moneda;
+class PantallaDetalle extends StatefulWidget {
+  final String monedaId;
+  final Map<String, String>? monedaInicial;
   final void Function(Map<String, String>)? onEditar;
 
-  const DetalleMoneda({super.key, required this.moneda, this.onEditar});
+  const PantallaDetalle({
+    super.key,
+    required this.monedaId,
+    this.monedaInicial,
+    this.onEditar,
+  });
 
   @override
-  State<DetalleMoneda> createState() => _DetalleMonedaState();
+  State<PantallaDetalle> createState() => _PantallaDetalleState();
 }
 
-class _DetalleMonedaState extends State<DetalleMoneda>
+class _PantallaDetalleState extends State<PantallaDetalle>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 2, vsync: this);
   }
 
   @override
@@ -27,107 +35,79 @@ class _DetalleMonedaState extends State<DetalleMoneda>
     super.dispose();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final moneda = widget.moneda;
+  // ---------- Contenido principal (con la moneda ya cargada) ----------
+  Widget _buildContent(BuildContext context, Map<String, String> moneda) {
     final esMoneda = moneda['tipo'] == 'moneda';
     final colorScheme = Theme.of(context).colorScheme;
-
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(moneda['denominacion'] ?? 'Detalle'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.edit),
-            onPressed: () {
-              if (widget.onEditar != null) {
-                //print('Ingreso a editar');
-                final moneda = widget.moneda;
-                Navigator.pop(context);
-                WidgetsBinding.instance.addPostFrameCallback((_) {
-                  widget.onEditar!(moneda);
-                });
-              } else {
-                // Fallback si no hay callback (no debería ocurrir)
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('No se puede editar desde aquí'),
-                  ),
-                );
-              }
-            },
-          ),
-        ],
-      ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildMiniatura(
-                  '',
-                  moneda['fotoAnverso'],
-                  esMoneda,
-                  circular: esMoneda,
-                  expand: false,
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        moneda['denominacion'] ?? '',
-                        style: TextStyle(
-                          fontSize: 28,
-                          fontWeight: FontWeight.bold,
-                          color: colorScheme.onSurface,
-                        ),
+    print('📦 _buildContent llamado con moneda: ${moneda['denominacion']}');
+    return Column(
+      children: [
+        // Cabecera: foto + denominación + país/año
+        Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildMiniatura(
+                '',
+                moneda['fotoAnverso'],
+                esMoneda,
+                circular: esMoneda,
+                expand: false,
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      moneda['denominacion'] ?? '',
+                      style: TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        color: colorScheme.onSurface,
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        '${moneda['pais'] ?? ''} · año ${moneda['anio'] ?? ''}',
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: colorScheme.onSurface.withOpacity(0.7),
-                        ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '${moneda['pais'] ?? ''} · año ${moneda['anio'] ?? ''}',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: colorScheme.onSurface.withOpacity(0.7),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-          const SizedBox(height: 16),
-          // TabBar
-          TabBar(
+        ),
+        const SizedBox(height: 16),
+        // TabBar
+        TabBar(
+          controller: _tabController,
+          labelColor: colorScheme.primary,
+          unselectedLabelColor: colorScheme.onSurface.withOpacity(0.6),
+          indicatorColor: colorScheme.primary,
+          tabs: const [Tab(text: 'General'), Tab(text: 'Físicas')],
+        ),
+        // TabBarView
+        Expanded(
+          child: TabBarView(
             controller: _tabController,
-            labelColor: colorScheme.primary,
-            unselectedLabelColor: colorScheme.onSurface.withOpacity(0.6),
-            indicatorColor: colorScheme.primary,
-            tabs: const [Tab(text: 'General'), Tab(text: 'Físicas')],
+            children: [
+              _buildGeneralTab(moneda),
+              _buildFisicasTab(moneda),
+              _buildAdicionalTab(moneda),
+              _buildFotosTab(moneda, esMoneda),
+            ],
           ),
-
-          // TabBarView
-          Expanded(
-            child: TabBarView(
-              controller: _tabController,
-              children: [
-                _buildGeneralTab(moneda),
-                _buildFisicasTab(moneda),
-                _buildAdicionalTab(moneda),
-                _buildFotosTab(moneda, esMoneda),
-              ],
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
-  // ---------- Widgets auxiliares ----------
+  // ---------- Widgets auxiliares (igual que antes, sin cambios) ----------
 
   Widget _buildMiniatura(
     String titulo,
@@ -136,7 +116,8 @@ class _DetalleMonedaState extends State<DetalleMoneda>
     bool circular = false,
     bool expand = true,
   }) {
-    // Definir alto y ancho según el contexto
+    // ... (tu código existente, sin cambios)
+    // Para no alargar, dejo el mismo código que tenías
     double alto;
     double ancho;
 
@@ -159,7 +140,6 @@ class _DetalleMonedaState extends State<DetalleMoneda>
       }
     }
 
-    // Construir la imagen
     Widget imagenWidget;
     if (ruta != null && ruta.isNotEmpty) {
       if (circular) {
@@ -207,7 +187,6 @@ class _DetalleMonedaState extends State<DetalleMoneda>
       );
     }
 
-    // Contenedor con borde
     Widget contenedor = Container(
       height: alto,
       width: ancho,
@@ -219,12 +198,10 @@ class _DetalleMonedaState extends State<DetalleMoneda>
       child: imagenWidget,
     );
 
-    // Si es circular, forzamos el tamaño con un SizedBox para evitar deformaciones
     if (circular) {
       contenedor = SizedBox(width: alto, height: alto, child: contenedor);
     }
 
-    // Si expand es true, envolvemos en Expanded y añadimos el título
     if (expand) {
       return Expanded(
         child: Column(
@@ -245,7 +222,6 @@ class _DetalleMonedaState extends State<DetalleMoneda>
         ),
       );
     } else {
-      // Para la cabecera: sin Expanded, tamaño fijo
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -287,7 +263,7 @@ class _DetalleMonedaState extends State<DetalleMoneda>
     );
   }
 
-  // ---------- Pestañas ----------
+  // ---------- Pestañas (iguales, sin cambios) ----------
 
   Widget _buildGeneralTab(Map<String, String> moneda) {
     return Padding(
@@ -299,6 +275,7 @@ class _DetalleMonedaState extends State<DetalleMoneda>
           _buildCampo('Denominación', moneda['denominacion']),
           _buildCampo('País', moneda['pais']),
           _buildCampo('Año', moneda['anio']),
+          _buildCampo('Año Gregoriano', moneda['anioGregoriano']),
           _buildCampo('Cantidad', moneda['cantidad']),
         ]),
       ),
@@ -446,6 +423,70 @@ class _DetalleMonedaState extends State<DetalleMoneda>
               );
             }).toList(),
       ),
+    );
+  }
+
+  // ---------- BUILD PRINCIPAL (con StreamBuilder) ----------
+  String _lastUpdate = '';
+  @override
+  Widget build(BuildContext context) {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      return const Scaffold(
+        body: Center(child: Text('Usuario no autenticado')),
+      );
+    }
+    print('📌 PantallaDetalle construida con monedaId: ${widget.monedaId}');
+    final stream =
+        FirebaseFirestore.instance
+            .collection('usuarios')
+            .doc(user.uid)
+            .collection('monedas')
+            .doc(widget.monedaId)
+            .snapshots();
+
+    return StreamBuilder<DocumentSnapshot>(
+      stream: stream,
+      builder: (context, snapshot) {
+        print(
+          '🔄 StreamBuilder ejecutado. snapshot: ${snapshot.connectionState}',
+        );
+        // Determinar la moneda a mostrar (inicial o desde Firestore)
+        Map<String, String>? moneda;
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          moneda = widget.monedaInicial;
+        } else if (snapshot.hasData && snapshot.data!.exists) {
+          final data = snapshot.data!.data() as Map<String, dynamic>;
+          final m = Map<String, String>.from(data);
+          m['_id'] = snapshot.data!.id;
+          moneda = m;
+        }
+
+        if (moneda == null) {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
+
+        return Scaffold(
+          resizeToAvoidBottomInset: false,
+          appBar: AppBar(
+            title: Text(moneda!['denominacion'] ?? 'Detalle'),
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.edit),
+                onPressed: () {
+                  if (widget.onEditar != null) {
+                    widget.onEditar!(moneda!);
+                    // No cerramos el detalle, el diálogo se abre sobre él
+                  }
+                },
+              ),
+            ],
+          ),
+          body: _buildContent(context, moneda!),
+        );
+      },
     );
   }
 }

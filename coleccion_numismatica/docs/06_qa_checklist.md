@@ -189,6 +189,12 @@
 - [ ] El formulario de edición carga correctamente los datos de la pieza.
 - [ ] Al guardar los cambios, la pieza se actualiza en Firestore y la lista se refresca automáticamente.
 - [ ] La edición desde la lista (lápiz en tarjeta) sigue funcionando correctamente.
+- [ ] Al tocar el lápiz en la pantalla de detalle, se abre el formulario de edición **sobre el detalle** (sin cerrarlo).
+- [ ] El formulario de edición carga correctamente los datos de la pieza.
+- [ ] Al guardar los cambios, la pieza se actualiza en Firestore y el detalle se refresca automáticamente (sin recargar).
+- [ ] La vista de detalle no muestra overflow al editar con el teclado abierto.
+- [ ] La edición desde la lista (lápiz en tarjeta) sigue funcionando correctamente.
+- [ ] La edición funciona correctamente en intentos sucesivos (sin fallos de persistencia).
 ---
 
 ## 10. Pruebas de tema visual (claro/oscuro)

@@ -147,6 +147,22 @@
 - **Problema conocido**: Al abrir el formulario desde el detalle, este se muestra sobre la lista de colección en lugar de sobre el detalle. Se corregirá en la próxima sesión (usando `showDialog` en el contexto correcto o una ruta de navegación separada).
 - **Solución planificada**: Mantener el detalle abierto mientras se edita (abrir el diálogo sobre el detalle) o, alternativamente, usar una ruta de navegación separada para la edición.
 
+## Decisión: Usar `StreamBuilder` en `PantallaDetalle` para actualización en tiempo real
+- **Fecha**: 23/06/2026
+- **Motivo**: La pantalla de detalle no se actualizaba automáticamente tras editar una moneda desde el detalle, ni al cambiar datos desde otros lugares.
+
+## Decisión: Corregir lógica de edición para usar `_id` en lugar de `indice`
+- **Fecha**: 23/06/2026
+- **Motivo**: La edición desde detalle fallaba porque `indice` era `null` y no se ejecutaba la actualización en Firestore.
+
+## Decisión: Extraer lógica de edición a función reutilizable
+- **Fecha**: 21/06/2026
+- **Motivo**: Evitar duplicar código y permitir que la edición se dispare desde múltiples lugares (lista y detalle).
+
+## Decisión: Prevenir overflow al editar con teclado
+- **Fecha**: 23/06/2026
+- **Problema**: Al abrir el formulario de edición desde el detalle, el teclado redimensionaba la vista de fondo causando `bottom overflowed`.
+
 Ahora que el login y perfil están funcionando, el usuario puede registrarse y vincular su cuenta anónima. Esto completa una de las tareas más importantes. Vamos a actualizar la documentación y luego definir los próximos pasos.
 
 ## Problemas resueltos
@@ -171,6 +187,10 @@ Ahora que el login y perfil están funcionando, el usuario puede registrarse y v
 19. Tras la limpieza de estilos inline, se perdió el borde visual que indicaba el área del selector. Se restauró en `selector_imagen.dart` con `BoxDecoration(border: Border.all(color: Colors.grey), borderRadius: BorderRadius.circular(8))`.
 20. Se corrigió el tipo de `onEditar` de `VoidCallback?` a `void Function(Map<String, String>)?` para que coincida con `_editarDesdeDetalle`.
 21. Se usó `WidgetsBinding.instance.addPostFrameCallback` para asegurar que el detalle se cierre antes de abrir el diálogo de edición.
+22. Se corrigió edición desde detalle no persistía (segunda edición) usando `_id` en lugar de `indice` para la actualización en Firestore.
+23. El detalle no se actualizaba tras editar, por lo que, se implementó `StreamBuilder` para escuchar cambios en Firestore.
+24. Se desactivó la redimensión del `Scaffold` con `resizeToAvoidBottomInset: false` al editar.
+25. 
 
 
 ## Pendientes para próxima sesión

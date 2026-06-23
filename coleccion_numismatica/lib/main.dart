@@ -623,14 +623,16 @@ class _ListaMonedasState extends State<ListaMonedas> {
                       final esMoneda = moneda['tipo'] == 'moneda';
                       return GestureDetector(
                         onTap: () {
+                          final id = moneda['_id'];
+                          if (id == null) return; // no navegar si no hay ID
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder:
-                                  (context) => DetalleMoneda(
-                                    moneda: moneda,
-                                    onEditar: _editarDesdeDetalle,
-                                  ),
+                              builder: (context) => PantallaDetalle(
+                                monedaId: id,
+                                monedaInicial: moneda,
+                                onEditar: _editarDesdeDetalle,
+                              ),
                             ),
                           );
                         },
@@ -927,7 +929,7 @@ class _ListaMonedasState extends State<ListaMonedas> {
     String? idExistente;
     Map<String, String>? datosOpcionales;
     if (monedaEditada != null) {
-      idExistente = monedaEditada['_id']; // ← Guardamos el _id original
+      idExistente = monedaEditada['_id'];
       datosOpcionales = {
         'composicion': monedaEditada['composicion'] ?? '',
         'peso': monedaEditada['peso'] ?? '',
@@ -965,18 +967,18 @@ class _ListaMonedasState extends State<ListaMonedas> {
       final user = FirebaseAuth.instance.currentUser;
       print('=== Resultado recibido, indiceEdit=$indiceEdit ===');
 
-      if (indiceEdit != null) {
+      if (idExistente != null) {
         // === EDITAR ===
-        if (user != null && monedaParaGuardar.containsKey('_id')) {
+        if (user != null) {
           await FirebaseFirestore.instance
               .collection('usuarios')
               .doc(user.uid)
               .collection('monedas')
-              .doc(monedaParaGuardar['_id'])
+              .doc(idExistente)
               .update(monedaParaGuardar);
-          print('Moneda actualizada en Firestore');
+          print('✅ DOCUMENTO ACTUALIZADO EN FIRESTORE: $idExistente');
         } else {
-          print('Error: no se encontró _id para editar');
+          print('Error: usuario no autenticado');
         }
       } else {
         // === CREAR NUEVA ===
