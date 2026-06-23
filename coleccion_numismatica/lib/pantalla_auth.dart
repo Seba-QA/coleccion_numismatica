@@ -268,13 +268,10 @@ class _PantallaAuthState extends State<PantallaAuth> {
                     shape: BoxShape.circle,
                   ),
                   child: Center(
-                    child: Text(
-                      'N',
-                      style: TextStyle(
-                        fontSize: 40,
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
+                    child: Icon(
+                      Icons.monetization_on,
+                      size: 48,
+                      color: Theme.of(context).colorScheme.primary,
                     ),
                   ),
                 ),

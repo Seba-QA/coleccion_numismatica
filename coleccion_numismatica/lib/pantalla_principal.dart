@@ -49,10 +49,13 @@ class _PantallaPrincipalState extends State<PantallaPrincipal> {
             label: 'Mi Colección',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.bar_chart),
+            icon: Icon(Icons.trending_up),
             label: 'Estadísticas',
           ),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Perfil'),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.account_circle), 
+            label: 'Perfil'
+          ),
         ],
         type:
             BottomNavigationBarType

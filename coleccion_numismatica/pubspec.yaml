@@ -29,6 +29,8 @@ dependencies:
   permission_handler: ^11.3.1
   # Estadisticas
   fl_chart: ^0.70.0
+  # Iconos
+  font_awesome_flutter: ^10.7.0
 
   # Compartición de archivos
   share_plus: ^10.1.0

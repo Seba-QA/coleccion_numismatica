@@ -7,9 +7,9 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'pantalla_auth.dart';
-import 'pantalla_perfil.dart';
 import 'servicio_auth.dart';
 import 'pantalla_principal.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -661,8 +661,8 @@ class _ListaMonedasState extends State<ListaMonedas> {
                                   ),
                                   child: Icon(
                                     esMoneda
-                                        ? Icons.monetization_on
-                                        : Icons.attach_money,
+                                        ? FontAwesomeIcons.coins
+                                        : FontAwesomeIcons.moneyBill,
                                     color: const Color(0xFFC9A03D),
                                   ),
                                 ),
@@ -708,7 +708,7 @@ class _ListaMonedasState extends State<ListaMonedas> {
                                     ),
                                     IconButton(
                                       icon: const Icon(
-                                        Icons.delete,
+                                        Icons.remove_circle,
                                         color: Colors.red,
                                       ),
                                       onPressed: () async {
