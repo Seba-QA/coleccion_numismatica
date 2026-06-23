@@ -175,223 +175,296 @@ class _PantallaAuthState extends State<PantallaAuth> {
     return showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        title: const Text('Restablecer contraseña'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text(
-              'Te enviaremos un enlace a tu correo para restablecer tu contraseña.',
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Restablecer contraseña'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  'Te enviaremos un enlace a tu correo para restablecer tu contraseña.',
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: emailController,
+                  decoration: const InputDecoration(
+                    labelText: 'Correo electrónico',
+                    hintText: 'tu@correo.com',
+                    border: OutlineInputBorder(),
+                  ),
+                  keyboardType: TextInputType.emailAddress,
+                ),
+              ],
             ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: emailController,
-              decoration: const InputDecoration(
-                labelText: 'Correo electrónico',
-                hintText: 'tu@correo.com',
-                border: OutlineInputBorder(),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Cancelar'),
               ),
-              keyboardType: TextInputType.emailAddress,
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancelar'),
+              ElevatedButton(
+                onPressed: () async {
+                  final email = emailController.text.trim();
+                  if (email.isEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Ingresa tu correo electrónico.'),
+                      ),
+                    );
+                    return;
+                  }
+                  try {
+                    await FirebaseAuth.instance.sendPasswordResetEmail(
+                      email: email,
+                    );
+                    if (mounted) Navigator.pop(context);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                          'Correo de restablecimiento enviado. Revisa tu bandeja de entrada.',
+                        ),
+                        backgroundColor: Colors.green,
+                      ),
+                    );
+                  } on FirebaseAuthException catch (e) {
+                    String mensaje;
+                    switch (e.code) {
+                      case 'user-not-found':
+                        mensaje =
+                            'No existe una cuenta con ese correo electrónico.';
+                        break;
+                      case 'invalid-email':
+                        mensaje = 'El correo electrónico no es válido.';
+                        break;
+                      default:
+                        mensaje = 'Error: ${e.message}';
+                    }
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(mensaje),
+                        backgroundColor: Theme.of(context).colorScheme.error,
+                      ),
+                    );
+                  }
+                },
+                child: const Text('Enviar'),
+              ),
+            ],
           ),
-          ElevatedButton(
-            onPressed: () async {
-              final email = emailController.text.trim();
-              if (email.isEmpty) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Ingresa tu correo electrónico.')),
-                );
-                return;
-              }
-              try {
-                await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
-                if (mounted) Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Correo de restablecimiento enviado. Revisa tu bandeja de entrada.'),
-                    backgroundColor: Colors.green,
-                  ),
-                );
-              } on FirebaseAuthException catch (e) {
-                String mensaje;
-                switch (e.code) {
-                  case 'user-not-found':
-                    mensaje = 'No existe una cuenta con ese correo electrónico.';
-                    break;
-                  case 'invalid-email':
-                    mensaje = 'El correo electrónico no es válido.';
-                    break;
-                  default:
-                    mensaje = 'Error: ${e.message}';
-                }
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(mensaje),
-                    backgroundColor: Theme.of(context).colorScheme.error,
-                  ),
-                );
-              }
-            },
-            child: const Text('Enviar'),
-          ),
-        ],
-      ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text(_isLogin ? 'Iniciar sesión' : 'Registrarse')),
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Form(
-          key: _formKey,
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // Logo provisional
-                Container(
-                  width: 80,
-                  height: 80,
-                  decoration: BoxDecoration(
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.primary.withOpacity(0.1),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Center(
-                    child: Icon(
-                      Icons.monetization_on,
-                      size: 48,
-                      color: Theme.of(context).colorScheme.primary,
+    return Theme(
+      data: Theme.of(context).copyWith(
+        textTheme: Theme.of(context).textTheme.copyWith(
+          labelLarge: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+        ),
+        textButtonTheme: TextButtonThemeData(
+          style: TextButton.styleFrom(
+            foregroundColor: Theme.of(context).colorScheme.onSurface,
+          ),
+        ),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            foregroundColor: Theme.of(context).colorScheme.onSurface,
+          ),
+        ),
+        outlinedButtonTheme: OutlinedButtonThemeData(
+          style: OutlinedButton.styleFrom(
+            foregroundColor: Theme.of(context).colorScheme.onSurface,
+          ),
+        ),
+      ),
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(_isLogin ? 'Iniciar sesión' : 'Registrarse'),
+        ),
+        body: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Form(
+            key: _formKey,
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // Logo provisional
+                  Container(
+                    width: 80,
+                    height: 80,
+                    decoration: BoxDecoration(
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.primary.withOpacity(0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Center(
+                      child: Icon(
+                        Icons.monetization_on,
+                        size: 48,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(height: 24),
-                SegmentedButton<String>(
-                  segments: const [
-                    ButtonSegment(
-                      value: 'login',
-                      label: Text('Iniciar sesión'),
-                    ),
-                    ButtonSegment(
-                      value: 'registro',
-                      label: Text('Registrarse'),
-                    ),
-                  ],
-                  selected: {_isLogin ? 'login' : 'registro'},
-                  onSelectionChanged: (Set<String> selection) {
-                    setState(() {
-                      _isLogin = selection.first == 'login';
-                      _confirmController.clear();
-                    });
-                  },
-                ),
-                const SizedBox(height: 20),
-                TextFormField(
-                  controller: _emailController,
-                  decoration: const InputDecoration(
-                    labelText: 'Correo electrónico',
-                  ),
-                  keyboardType: TextInputType.emailAddress,
-                  validator:
-                      (value) => value!.contains('@') ? null : 'Email inválido',
-                ),
-                const SizedBox(height: 12),
-                TextFormField(
-                  controller: _passwordController,
-                  decoration: const InputDecoration(labelText: 'Contraseña'),
-                  obscureText: true,
-                  validator:
-                      (value) =>
-                          value!.length >= 6 ? null : 'Mínimo 6 caracteres',
-                ),
-                if (_isLogin) ...[
-                  const SizedBox(height: 8),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      TextButton(
-                        onPressed: _mostrarDialogoRestablecer,
-                        child: const Text('¿Olvidaste tu contraseña?'),
+                  const SizedBox(height: 24),
+
+                  // Pestañas login/registro
+                  SegmentedButton<String>(
+                    segments: const [
+                      ButtonSegment(
+                        value: 'login',
+                        label: Text('Iniciar sesión'),
+                      ),
+                      ButtonSegment(
+                        value: 'registro',
+                        label: Text('Registrarse'),
                       ),
                     ],
-                  ),
-                ],
-                if (!_isLogin) ...[
-                  const SizedBox(height: 12),
-                  TextFormField(
-                    controller: _confirmController,
-                    decoration: const InputDecoration(
-                      labelText: 'Confirmar contraseña',
+                    selected: {_isLogin ? 'login' : 'registro'},
+                    onSelectionChanged: (Set<String> selection) {
+                      setState(() {
+                        _isLogin = selection.first == 'login';
+                        _confirmController.clear();
+                      });
+                    },
+                    style: ButtonStyle(
+                      backgroundColor: WidgetStateProperty.resolveWith((
+                        states,
+                      ) {
+                        if (states.contains(WidgetState.selected)) {
+                          return Theme.of(context).colorScheme.primary;
+                        }
+                        return Theme.of(context).colorScheme.surface;
+                      }),
+                      foregroundColor: WidgetStateProperty.resolveWith((
+                        states,
+                      ) {
+                        if (states.contains(WidgetState.selected)) {
+                          return Theme.of(context).colorScheme.onPrimary;
+                        }
+                        return Theme.of(context).colorScheme.onSurface;
+                      }),
                     ),
+                  ),
+                  const SizedBox(height: 20),
+
+                  // Campo email
+                  TextFormField(
+                    controller: _emailController,
+                    decoration: const InputDecoration(
+                      labelText: 'Correo electrónico',
+                    ),
+                    keyboardType: TextInputType.emailAddress,
+                    validator:
+                        (value) =>
+                            value!.contains('@') ? null : 'Email inválido',
+                  ),
+                  const SizedBox(height: 12),
+
+                  // Campo contraseña
+                  TextFormField(
+                    controller: _passwordController,
+                    decoration: const InputDecoration(labelText: 'Contraseña'),
                     obscureText: true,
                     validator:
                         (value) =>
-                            value == _passwordController.text
-                                ? null
-                                : 'Las contraseñas no coinciden',
+                            value!.length >= 6 ? null : 'Mínimo 6 caracteres',
                   ),
-                ],
-                const SizedBox(height: 24),
-                if (_isLoading)
-                  const CircularProgressIndicator()
-                else
-                  OutlinedButton(
-                    onPressed: _submit,
-                    style: ElevatedButton.styleFrom(
+
+                  // Enlace "¿Olvidaste tu contraseña?" (solo login)
+                  if (_isLogin) ...[
+                    const SizedBox(height: 8),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        TextButton(
+                          onPressed: _mostrarDialogoRestablecer,
+                          child: const Text(
+                            '¿Olvidaste tu contraseña?',
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+
+                  // Campo confirmar contraseña (solo registro)
+                  if (!_isLogin) ...[
+                    const SizedBox(height: 12),
+                    TextFormField(
+                      controller: _confirmController,
+                      decoration: const InputDecoration(
+                        labelText: 'Confirmar contraseña',
+                      ),
+                      obscureText: true,
+                      validator:
+                          (value) =>
+                              value == _passwordController.text
+                                  ? null
+                                  : 'Las contraseñas no coinciden',
+                    ),
+                  ],
+
+                  const SizedBox(height: 24),
+
+                  // Botón principal
+                  if (_isLoading)
+                    const CircularProgressIndicator()
+                  else
+                    OutlinedButton(
+                      onPressed: _submit,
+                      style: ElevatedButton.styleFrom(
+                        minimumSize: const Size(double.infinity, 45),
+                      ),
+                      child: Text(_isLogin ? 'Iniciar sesión' : 'Registrarse'),
+                    ),
+
+                  const SizedBox(height: 12),
+
+                  // Botón Google
+                  OutlinedButton.icon(
+                    onPressed: _googleSignIn,
+                    icon: const Icon(Icons.g_mobiledata, color: Colors.red),
+                    label: const Text('Continuar con Google'),
+                    style: OutlinedButton.styleFrom(
                       minimumSize: const Size(double.infinity, 45),
                     ),
-                    child: Text(_isLogin ? 'Ingresar' : 'Registrarse'),
                   ),
-                const SizedBox(height: 12),
-                OutlinedButton.icon(
-                  onPressed: _googleSignIn,
-                  icon: const Icon(Icons.g_mobiledata, color: Colors.red),
-                  label: const Text('Continuar con Google'),
-                  style: OutlinedButton.styleFrom(
-                    minimumSize: const Size(double.infinity, 45),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                TextButton(
-                  onPressed: () async {
-                    setState(() => _isLoading = true);
-                    try {
-                      await _auth.iniciarSesionAnonimo();
-                      if (mounted) {
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const ListaMonedas(),
+
+                  const SizedBox(height: 12),
+
+                  // Botón invitado
+                  TextButton(
+                    onPressed: () async {
+                      setState(() => _isLoading = true);
+                      try {
+                        await _auth.iniciarSesionAnonimo();
+                        if (mounted) {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const ListaMonedas(),
+                            ),
+                          );
+                        }
+                      } catch (e) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: const Text(
+                              'No se pudo ingresar como invitado. Inténtalo de nuevo.',
+                            ),
+                            backgroundColor: Colors.red.shade700,
+                            behavior: SnackBarBehavior.floating,
                           ),
                         );
+                      } finally {
+                        if (mounted) setState(() => _isLoading = false);
                       }
-                    } catch (e) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: const Text(
-                            'No se pudo ingresar como invitado. Inténtalo de nuevo.',
-                          ),
-                          backgroundColor: Colors.red.shade700,
-                          behavior: SnackBarBehavior.floating,
-                        ),
-                      );
-                    } finally {
-                      if (mounted) setState(() => _isLoading = false);
-                    }
-                  },
-                  child: const Text('Seguir como invitado →'),
-                ),
-              ],
+                    },
+                    child: const Text('Seguir como invitado →'),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
