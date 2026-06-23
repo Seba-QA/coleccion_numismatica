@@ -178,6 +178,14 @@
 -**Sección "CUENTA"**
   - **Vincular cuenta**: (solo visible para usuarios anónimos) Muestra una advertencia y un botón para vincular la cuenta anónima a una cuenta permanente (email/Google).
   - **Cerrar sesión**: Botón en rojo que cierra la sesión del usuario y vuelve a la pantalla de login.
+-**Exportación a PDF**
+  - El usuario puede exportar un catálogo en formato PDF desde la pantalla de perfil.
+  - El PDF incluye:
+    - **Encabezado**: "Mi Colección Numismática" y fecha de exportación.
+    - **Resumen**: tarjetas con totales de piezas, países, monedas y billetes.
+    - **Tabla detallada**: lista de todas las piezas con columnas: N°, Denominación, País, Año, Tipo, Cantidad.
+  - El archivo se genera en el directorio temporal y se comparte mediante el selector nativo del sistema (correo, almacenamiento, mensajería).
+  - **Nota**: Por ahora, el PDF solo incluye texto y números. La inclusión de imágenes se considera una mejora futura.
 
 
 ## Pantalla de estadísticas (nueva)

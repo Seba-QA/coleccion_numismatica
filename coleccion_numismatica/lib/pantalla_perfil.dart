@@ -8,7 +8,9 @@ import 'package:file_picker/file_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'servicio_auth.dart';
 import 'pantalla_auth.dart';
-import 'pantalla_estadisticas.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:printing/printing.dart';
 
 class PantallaPerfil extends StatefulWidget {
   final VoidCallback? onDatosCambiados;
@@ -173,6 +175,188 @@ class _PantallaPerfilState extends State<PantallaPerfil> {
     if (mounted) Navigator.popUntil(context, (route) => route.isFirst);
   }
 
+  Future<void> _exportarPDF() async {
+    try {
+      // 1. Obtener datos
+      final monedas = await _obtenerMonedasDeFirestore();
+
+      if (monedas.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('No hay datos para exportar.')),
+        );
+        return;
+      }
+
+      // 2. Calcular totales
+      final totalPiezas = monedas.length;
+      final paises =
+          monedas
+              .map((m) => m['pais'] ?? '')
+              .where((p) => p.isNotEmpty)
+              .toSet();
+      final totalPaises = paises.length;
+      final totalMonedas = monedas.where((m) => m['tipo'] == 'moneda').length;
+      final totalBilletes = monedas.where((m) => m['tipo'] == 'billete').length;
+
+      // 3. Crear documento PDF
+      final pdf = pw.Document();
+
+      pdf.addPage(
+        pw.MultiPage(
+          pageFormat: PdfPageFormat.a4,
+          margin: pw.EdgeInsets.all(40),
+          build:
+              (context) => [
+                // Encabezado
+                pw.Column(
+                  crossAxisAlignment: pw.CrossAxisAlignment.start,
+                  children: [
+                    pw.Text(
+                      'Mi Colección Numismática',
+                      style: pw.TextStyle(
+                        fontSize: 24,
+                        fontWeight: pw.FontWeight.bold,
+                        color: PdfColors.blue,
+                      ),
+                    ),
+                    pw.SizedBox(height: 8),
+                    pw.Text(
+                      'Exportado: ${DateTime.now().toString().split(' ')[0]}',
+                      style: pw.TextStyle(fontSize: 12, color: PdfColors.grey),
+                    ),
+                    pw.Divider(),
+                  ],
+                ),
+                // Resumen
+                pw.Container(
+                  margin: pw.EdgeInsets.symmetric(vertical: 16),
+                  child: pw.Row(
+                    mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                    children: [
+                      _buildSummaryCard('Piezas', '$totalPiezas'),
+                      _buildSummaryCard('Países', '$totalPaises'),
+                      _buildSummaryCard('Monedas', '$totalMonedas'),
+                      _buildSummaryCard('Billetes', '$totalBilletes'),
+                    ],
+                  ),
+                ),
+                pw.Divider(),
+                // Tabla de piezas
+                pw.SizedBox(height: 16),
+                pw.Text(
+                  'Listado de piezas',
+                  style: pw.TextStyle(
+                    fontSize: 18,
+                    fontWeight: pw.FontWeight.bold,
+                  ),
+                ),
+                pw.SizedBox(height: 8),
+                _buildTable(monedas),
+              ],
+        ),
+      );
+
+      // 4. Guardar temporalmente
+      final output = await getTemporaryDirectory();
+      final fileName = 'coleccion_${DateTime.now().millisecondsSinceEpoch}.pdf';
+      final file = File('${output.path}/$fileName');
+      await file.writeAsBytes(await pdf.save());
+
+      // 5. Compartir
+      await Share.shareXFiles([
+        XFile(file.path),
+      ], text: 'Mi colección numismática');
+    } catch (e) {
+      print('Error exportando PDF: $e');
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Error al generar el PDF.')));
+    }
+  }
+
+  // Widgets auxiliares para el PDF
+  pw.Widget _buildSummaryCard(String label, String value) {
+    return pw.Container(
+      padding: pw.EdgeInsets.all(12),
+      decoration: pw.BoxDecoration(
+        border: pw.Border.all(color: PdfColors.grey300),
+        borderRadius: pw.BorderRadius.circular(8),
+      ),
+      child: pw.Column(
+        crossAxisAlignment: pw.CrossAxisAlignment.center,
+        children: [
+          pw.Text(
+            value,
+            style: pw.TextStyle(fontSize: 20, fontWeight: pw.FontWeight.bold),
+          ),
+          pw.Text(
+            label,
+            style: pw.TextStyle(fontSize: 12, color: PdfColors.grey),
+          ),
+        ],
+      ),
+    );
+  }
+
+  pw.Widget _buildTable(List<Map<String, String>> monedas) {
+    final headers = ['#', 'Denominación', 'País', 'Año', 'Tipo', 'Cantidad'];
+    final rows =
+        monedas.asMap().entries.map((entry) {
+          final index = entry.key + 1;
+          final m = entry.value;
+          return [
+            index.toString(),
+            m['denominacion'] ?? '',
+            m['pais'] ?? '',
+            m['anio'] ?? '',
+            m['tipo'] == 'moneda' ? 'Moneda' : 'Billete',
+            m['cantidad'] ?? '1',
+          ];
+        }).toList();
+
+    return pw.Table(
+      border: pw.TableBorder.all(color: PdfColors.grey300),
+      columnWidths: {
+        0: pw.FixedColumnWidth(30),
+        1: pw.FlexColumnWidth(3),
+        2: pw.FlexColumnWidth(2),
+        3: pw.FixedColumnWidth(50),
+        4: pw.FixedColumnWidth(60),
+        5: pw.FixedColumnWidth(50),
+      },
+      children: [
+        pw.TableRow(
+          decoration: pw.BoxDecoration(color: PdfColors.grey200),
+          children:
+              headers
+                  .map(
+                    (h) => pw.Padding(
+                      padding: pw.EdgeInsets.all(8),
+                      child: pw.Text(
+                        h,
+                        style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
+                      ),
+                    ),
+                  )
+                  .toList(),
+        ),
+        ...rows.map(
+          (row) => pw.TableRow(
+            children:
+                row
+                    .map(
+                      (cell) => pw.Padding(
+                        padding: pw.EdgeInsets.all(8),
+                        child: pw.Text(cell),
+                      ),
+                    )
+                    .toList(),
+          ),
+        ),
+      ],
+    );
+  }
+
   // ---------- Funciones auxiliares ----------
   String _obtenerMetodoAutenticacion() {
     if (_user.isAnonymous) return 'anonimo';
@@ -205,7 +389,6 @@ class _PantallaPerfilState extends State<PantallaPerfil> {
     }
     return 'Usuario';
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -249,11 +432,12 @@ class _PantallaPerfilState extends State<PantallaPerfil> {
                   const SizedBox(height: 8),
                   // Estadísticas: piezas y países
                   StreamBuilder<QuerySnapshot>(
-                    stream: FirebaseFirestore.instance
-                        .collection('usuarios')
-                        .doc(FirebaseAuth.instance.currentUser?.uid)
-                        .collection('monedas')
-                        .snapshots(),
+                    stream:
+                        FirebaseFirestore.instance
+                            .collection('usuarios')
+                            .doc(FirebaseAuth.instance.currentUser?.uid)
+                            .collection('monedas')
+                            .snapshots(),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         return Row(
@@ -276,15 +460,20 @@ class _PantallaPerfilState extends State<PantallaPerfil> {
                         );
                       }
 
-                      final List<Map<String, String>> monedas = snapshot.data!.docs.map((doc) {
-                        final data = doc.data() as Map<String, dynamic>;
-                        final moneda = Map<String, String>.from(data);
-                        moneda['_id'] = doc.id;
-                        return moneda;
-                      }).toList();
+                      final List<Map<String, String>> monedas =
+                          snapshot.data!.docs.map((doc) {
+                            final data = doc.data() as Map<String, dynamic>;
+                            final moneda = Map<String, String>.from(data);
+                            moneda['_id'] = doc.id;
+                            return moneda;
+                          }).toList();
 
                       final totalPiezas = monedas.length;
-                      final paises = monedas.map((m) => m['pais'] ?? '').where((p) => p.isNotEmpty).toSet();
+                      final paises =
+                          monedas
+                              .map((m) => m['pais'] ?? '')
+                              .where((p) => p.isNotEmpty)
+                              .toSet();
                       final totalPaises = paises.length;
 
                       return Row(
@@ -330,6 +519,12 @@ class _PantallaPerfilState extends State<PantallaPerfil> {
               title: 'Importar colección',
               subtitle: 'Desde archivo JSON',
               onTap: _importarDatos,
+            ),
+            _buildActionCard(
+              icon: Icons.picture_as_pdf,
+              title: 'Exportar a PDF',
+              subtitle: 'Catálogo en texto',
+              onTap: _exportarPDF,
             ),
             const SizedBox(height: 4),
             const Text(

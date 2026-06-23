@@ -31,7 +31,9 @@ dependencies:
   fl_chart: ^0.70.0
   # Iconos
   font_awesome_flutter: ^10.7.0
-
+  #PDF
+  pdf: ^3.11.0
+  printing: ^5.13.0
   # Compartición de archivos
   share_plus: ^10.1.0
   file_picker: ^8.1.4

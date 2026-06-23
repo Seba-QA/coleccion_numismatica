@@ -167,6 +167,10 @@
 - **Fecha**: 23/06/2026
 - **Problema**: Los iconos de moneda y billete eran demasiado similares (`monetization_on` vs `attach_money`), dificultando la identificación visual en la lista de colección.
 
+## Decisión: Implementar exportación a PDF (texto y números)
+- **Fecha**: 23/06/2026
+- **Motivo**: Ofrecer al usuario una forma de generar un catálogo legible y compartible de su colección, complementando la exportación JSON (que es para respaldo e importación).
+
 Ahora que el login y perfil están funcionando, el usuario puede registrarse y vincular su cuenta anónima. Esto completa una de las tareas más importantes. Vamos a actualizar la documentación y luego definir los próximos pasos.
 
 ## Problemas resueltos

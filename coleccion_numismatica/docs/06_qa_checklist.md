@@ -171,6 +171,13 @@
 - [ ] Si el usuario es anónimo, se muestra la advertencia y el botón de vincular cuenta.
 - [ ] Cerrar sesión cierra la sesión y redirige a la pantalla de login.
 - [ ] El modo oscuro se aplica correctamente a todos los elementos.
+- [ ] Al tocar "Exportar a PDF" en el perfil, se genera un archivo PDF sin errores.
+- [ ] El PDF contiene el encabezado con la fecha correcta.
+- [ ] Las tarjetas de resumen muestran los totales correctos (piezas, países, monedas, billetes).
+- [ ] La tabla lista todas las piezas con los datos correctos.
+- [ ] El PDF se puede compartir y abrir correctamente.
+- [ ] El PDF se ve bien incluso con muchas piezas (paginación automática).
+- [ ] Si la colección está vacía, se muestra un mensaje adecuado.
 
 ---
 
