@@ -163,27 +163,22 @@
 - **Nota**: No incluye sección de "Información adicional" (se omite por ahora).
 
 ## Pantalla de perfil (rediseñada)
+-**Cabecera**
+  - **Avatar**: Círculo con la inicial del nombre de usuario (o del email, o "?" si es anónimo).
+  - **Nombre**: Muestra el nombre del usuario (obtenido del email, displayName, o "Invitado" para anónimos).
+  - **Estadísticas**:
+    - Los contadores de "Piezas" y "Países" se actualizan automáticamente mediante un `StreamBuilder` que escucha la colección del usuario en Firestore.
+  - No dependen de datos pasados desde la lista, lo que garantiza que siempre estén sincronizados con la base de datos.
+-**Tarjetas de información**
+  - **Correo electrónico**: Muestra el email del usuario autenticado.
+  - **Método de autenticación**: Muestra el proveedor usado (Google, Email/Contraseña, Anónimo).
+-**Sección "DATOS DE COLECCIÓN"**
+  - **Exportar colección**: Botón que permite exportar la colección a JSON (compartir archivo).
+  - **Importar colección**: Botón que permite importar un archivo JSON con opciones de reemplazar o fusionar.
+-**Sección "CUENTA"**
+  - **Vincular cuenta**: (solo visible para usuarios anónimos) Muestra una advertencia y un botón para vincular la cuenta anónima a una cuenta permanente (email/Google).
+  - **Cerrar sesión**: Botón en rojo que cierra la sesión del usuario y vuelve a la pantalla de login.
 
-### Cabecera
-- **Avatar**: Círculo con la inicial del nombre de usuario (o del email, o "?" si es anónimo).
-- **Nombre**: Muestra el nombre del usuario (obtenido del email, displayName, o "Invitado" para anónimos).
-- **Estadísticas**: (placeholder) Muestra total de piezas y países (actualmente en 0, pendiente de implementar la lógica en vista de estadísticas).
-
-### Tarjetas de información
-- **Correo electrónico**: Muestra el email del usuario autenticado.
-- **Método de autenticación**: Muestra el proveedor usado (Google, Email/Contraseña, Anónimo).
-
-### Sección "DATOS DE COLECCIÓN"
-- **Exportar colección**: Botón que permite exportar la colección a JSON (compartir archivo).
-- **Importar colección**: Botón que permite importar un archivo JSON con opciones de reemplazar o fusionar.
-
-### Sección "CUENTA"
-- **Vincular cuenta**: (solo visible para usuarios anónimos) Muestra una advertencia y un botón para vincular la cuenta anónima a una cuenta permanente (email/Google).
-- **Cerrar sesión**: Botón en rojo que cierra la sesión del usuario y vuelve a la pantalla de login.
-
-### Notas
-- La pestaña "Adicional" en el detalle está comentada (reservada para futuras mejoras).
-- Las estadísticas de perfil (piezas/países) se implementarán en una vista de estadísticas dedicada.
 
 ## Pantalla de estadísticas (nueva)
 
@@ -206,4 +201,5 @@ Accesible desde la tercera pestaña del menú inferior (icono de gráfico).
   - **Nombres de países en eje X**: Los nombres de los países se muestran debajo de las barras, con capitalización automática (primera letra mayúscula) y normalización de texto para agrupar correctamente variaciones ortográficas (mayúsculas, minúsculas, tildes, espacios, caracteres especiales).
   - **Eje X limpio para décadas**: En el gráfico de distribución por décadas, solo se muestra el año de la década (sin números redundantes). La cantidad se lee en el eje Y.
   - **Agrupación de países**: Los países se normalizan y agrupan, evitando duplicados por diferencias de escritura. El nombre mostrado se capitaliza automáticamente.
+
 

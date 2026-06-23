@@ -163,6 +163,10 @@
 - **Fecha**: 23/06/2026
 - **Problema**: Al abrir el formulario de edición desde el detalle, el teclado redimensionaba la vista de fondo causando `bottom overflowed`.
 
+## Decisión: Mejorar iconos de la app (diferenciación moneda/billete)
+- **Fecha**: 23/06/2026
+- **Problema**: Los iconos de moneda y billete eran demasiado similares (`monetization_on` vs `attach_money`), dificultando la identificación visual en la lista de colección.
+
 Ahora que el login y perfil están funcionando, el usuario puede registrarse y vincular su cuenta anónima. Esto completa una de las tareas más importantes. Vamos a actualizar la documentación y luego definir los próximos pasos.
 
 ## Problemas resueltos
@@ -190,7 +194,6 @@ Ahora que el login y perfil están funcionando, el usuario puede registrarse y v
 22. Se corrigió edición desde detalle no persistía (segunda edición) usando `_id` en lugar de `indice` para la actualización en Firestore.
 23. El detalle no se actualizaba tras editar, por lo que, se implementó `StreamBuilder` para escuchar cambios en Firestore.
 24. Se desactivó la redimensión del `Scaffold` con `resizeToAvoidBottomInset: false` al editar.
-25. 
 
 
 ## Pendientes para próxima sesión

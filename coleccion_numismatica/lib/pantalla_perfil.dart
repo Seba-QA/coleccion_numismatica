@@ -11,10 +11,9 @@ import 'pantalla_auth.dart';
 import 'pantalla_estadisticas.dart';
 
 class PantallaPerfil extends StatefulWidget {
-  final List<Map<String, String>>? monedas;
   final VoidCallback? onDatosCambiados;
 
-  const PantallaPerfil({super.key, this.monedas, this.onDatosCambiados});
+  const PantallaPerfil({super.key, this.onDatosCambiados});
 
   @override
   State<PantallaPerfil> createState() => _PantallaPerfilState();
@@ -33,7 +32,7 @@ class _PantallaPerfilState extends State<PantallaPerfil> {
   // ---------- Funciones existentes (sin cambios) ----------
   Future<void> _exportarDatos() async {
     try {
-      final jsonData = jsonEncode(widget.monedas);
+      final jsonData = jsonEncode(_obtenerMonedasDeFirestore());
       final tempDir = await getTemporaryDirectory();
       final fileName =
           'coleccion_${DateTime.now().millisecondsSinceEpoch}.json';
@@ -207,16 +206,6 @@ class _PantallaPerfilState extends State<PantallaPerfil> {
     return 'Usuario';
   }
 
-  // ---------- Estadísticas ----------
-  int get _totalPiezas => widget.monedas?.length ?? 0;
-
-  int get _totalPaises {
-    final lista = widget.monedas;
-    if (lista == null || lista.isEmpty) return 0;
-    final paises =
-        lista.map((m) => m['pais'] ?? '').where((p) => p.isNotEmpty).toSet();
-    return paises.length;
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -259,13 +248,54 @@ class _PantallaPerfilState extends State<PantallaPerfil> {
                   // "Coleccionista desde" no disponible, omitimos
                   const SizedBox(height: 8),
                   // Estadísticas: piezas y países
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      _buildStatItem('$_totalPiezas', 'Piezas'),
-                      const SizedBox(width: 24),
-                      _buildStatItem('$_totalPaises', 'Países'),
-                    ],
+                  StreamBuilder<QuerySnapshot>(
+                    stream: FirebaseFirestore.instance
+                        .collection('usuarios')
+                        .doc(FirebaseAuth.instance.currentUser?.uid)
+                        .collection('monedas')
+                        .snapshots(),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            _buildStatItem('...', 'Piezas'),
+                            const SizedBox(width: 24),
+                            _buildStatItem('...', 'Países'),
+                          ],
+                        );
+                      }
+                      if (snapshot.hasError || !snapshot.hasData) {
+                        return Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            _buildStatItem('0', 'Piezas'),
+                            const SizedBox(width: 24),
+                            _buildStatItem('0', 'Países'),
+                          ],
+                        );
+                      }
+
+                      final List<Map<String, String>> monedas = snapshot.data!.docs.map((doc) {
+                        final data = doc.data() as Map<String, dynamic>;
+                        final moneda = Map<String, String>.from(data);
+                        moneda['_id'] = doc.id;
+                        return moneda;
+                      }).toList();
+
+                      final totalPiezas = monedas.length;
+                      final paises = monedas.map((m) => m['pais'] ?? '').where((p) => p.isNotEmpty).toSet();
+                      final totalPaises = paises.length;
+
+                      return Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          _buildStatItem('$totalPiezas', 'Piezas'),
+                          const SizedBox(width: 24),
+                          _buildStatItem('$totalPaises', 'Países'),
+                        ],
+                      );
+                    },
                   ),
                   const SizedBox(height: 24),
                 ],
