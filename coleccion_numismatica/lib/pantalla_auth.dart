@@ -97,7 +97,7 @@ class _PantallaAuthState extends State<PantallaAuth> {
         default:
           mensaje = 'Error al iniciar sesión: ${e.message}';
       }
-
+      if (mounted) setState(() => _isLoading = false);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(mensaje),
@@ -173,10 +173,15 @@ class _PantallaAuthState extends State<PantallaAuth> {
     );
 
     return showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder:
-          (context) => AlertDialog(
+          context: context,
+          barrierDismissible: false,
+          barrierColor: Colors.black54, // ← Oscurece el fondo de la pantalla
+          builder: (context) => AlertDialog(
+            backgroundColor: Theme.of(context).colorScheme.surface, // ← Fondo sólido
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            elevation: 8,
             title: const Text('Restablecer contraseña'),
             content: Column(
               mainAxisSize: MainAxisSize.min,
@@ -235,9 +240,13 @@ class _PantallaAuthState extends State<PantallaAuth> {
                       case 'invalid-email':
                         mensaje = 'El correo electrónico no es válido.';
                         break;
+                      case 'network-request-failed':
+                        mensaje = 'No hay conexión a internet. Verifica tu red.';
+                        break;
                       default:
                         mensaje = 'Error: ${e.message}';
                     }
+                    if (mounted) Navigator.pop(context);
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text(mensaje),
@@ -324,8 +333,11 @@ class _PantallaAuthState extends State<PantallaAuth> {
                     onSelectionChanged: (Set<String> selection) {
                       setState(() {
                         _isLogin = selection.first == 'login';
+                        _emailController.clear();
+                        _passwordController.clear();
                         _confirmController.clear();
                       });
+                      _formKey.currentState?.reset();
                     },
                     style: ButtonStyle(
                       backgroundColor: WidgetStateProperty.resolveWith((
@@ -355,9 +367,15 @@ class _PantallaAuthState extends State<PantallaAuth> {
                       labelText: 'Correo electrónico',
                     ),
                     keyboardType: TextInputType.emailAddress,
-                    validator:
-                        (value) =>
-                            value!.contains('@') ? null : 'Email inválido',
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'El correo es obligatorio';
+                      }
+                      if (!value.contains('@')) {
+                        return 'Ingresa un correo válido';
+                      }
+                      return null;
+                    },
                   ),
                   const SizedBox(height: 12),
 
@@ -366,9 +384,15 @@ class _PantallaAuthState extends State<PantallaAuth> {
                     controller: _passwordController,
                     decoration: const InputDecoration(labelText: 'Contraseña'),
                     obscureText: true,
-                    validator:
-                        (value) =>
-                            value!.length >= 6 ? null : 'Mínimo 6 caracteres',
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'La contraseña es obligatoria';
+                      }
+                      if (value.length < 6) {
+                        return 'Mínimo 6 caracteres';
+                      }
+                      return null;
+                    }
                   ),
 
                   // Enlace "¿Olvidaste tu contraseña?" (solo login)
