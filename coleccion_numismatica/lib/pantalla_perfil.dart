@@ -23,18 +23,12 @@ class PantallaPerfil extends StatefulWidget {
 
 class _PantallaPerfilState extends State<PantallaPerfil> {
   final ServicioAuth _auth = ServicioAuth();
-  late User _user;
-
-  @override
-  void initState() {
-    super.initState();
-    _user = FirebaseAuth.instance.currentUser!;
-  }
 
   // ---------- Funciones existentes (sin cambios) ----------
   Future<void> _exportarDatos() async {
     try {
-      final jsonData = jsonEncode(_obtenerMonedasDeFirestore());
+      final monedas = await _obtenerMonedasDeFirestore();
+      final jsonData = jsonEncode(monedas);
       final tempDir = await getTemporaryDirectory();
       final fileName =
           'coleccion_${DateTime.now().millisecondsSinceEpoch}.json';
@@ -44,9 +38,12 @@ class _PantallaPerfilState extends State<PantallaPerfil> {
         XFile(file.path),
       ], text: 'Mi colección numismática');
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Error al exportar los datos')),
-      );
+      print('Error en _exportarDatos: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error al exportar los datos: $e')),
+        );
+      }
     }
   }
 
@@ -171,8 +168,28 @@ class _PantallaPerfilState extends State<PantallaPerfil> {
   }
 
   Future<void> _cerrarSesion() async {
-    await _auth.cerrarSesion();
-    if (mounted) Navigator.popUntil(context, (route) => route.isFirst);
+    try {
+      await _auth.cerrarSesion();
+      // Pequeño delay para permitir que Firebase actualice el estado
+      await Future.delayed(const Duration(milliseconds: 500));
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('No se pudo cerrar sesión. Intenta nuevamente.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+      return;
+    }
+    if (mounted) {
+      // Navegar a PantallaAuth eliminando todo el stack de rutas
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (_) => const PantallaAuth()),
+        (route) => false,
+      );
+    }
   }
 
   Future<void> _exportarPDF() async {
@@ -358,10 +375,9 @@ class _PantallaPerfilState extends State<PantallaPerfil> {
   }
 
   // ---------- Funciones auxiliares ----------
-  String _obtenerMetodoAutenticacion() {
-    if (_user.isAnonymous) return 'anonimo';
-    if (_user.providerData.isNotEmpty)
-      return _user.providerData.first.providerId;
+  String _obtenerMetodoAutenticacion(User user) {
+    if (user.isAnonymous) return 'anonimo';
+    if (user.providerData.isNotEmpty) return user.providerData.first.providerId;
     return 'desconocido';
   }
 
@@ -378,12 +394,12 @@ class _PantallaPerfilState extends State<PantallaPerfil> {
     }
   }
 
-  String _obtenerNombreUsuario() {
-    if (_user.isAnonymous) return 'Invitado';
-    if (_user.displayName != null && _user.displayName!.isNotEmpty) {
-      return _user.displayName!;
+  String _obtenerNombreUsuario(User user) {
+    if (user.isAnonymous) return 'Invitado';
+    if (user.displayName != null && user.displayName!.isNotEmpty) {
+      return user.displayName!;
     }
-    final email = _user.email;
+    final email = user.email;
     if (email != null && email.contains('@')) {
       return email.split('@').first;
     }
@@ -392,12 +408,13 @@ class _PantallaPerfilState extends State<PantallaPerfil> {
 
   @override
   Widget build(BuildContext context) {
+    final user = FirebaseAuth.instance.currentUser!;
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
-    final esAnonimo = _user.isAnonymous;
-    final nombre = _obtenerNombreUsuario();
-    final email = _user.email ?? 'Sin email';
-    final metodoString = _metodoString(_obtenerMetodoAutenticacion());
+    final esAnonimo = user.isAnonymous;
+    final nombre = _obtenerNombreUsuario(user);
+    final email = user.email ?? 'Sin email';
+    final metodoString = _metodoString(_obtenerMetodoAutenticacion(user));
 
     return Scaffold(
       body: SingleChildScrollView(

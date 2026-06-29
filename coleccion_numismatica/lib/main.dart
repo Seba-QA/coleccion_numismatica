@@ -10,6 +10,7 @@ import 'pantalla_auth.dart';
 import 'servicio_auth.dart';
 import 'pantalla_principal.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:flutter/services.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -179,6 +180,8 @@ class ColeccionNumismaticaApp extends StatelessWidget {
     ),
   );
 
+
+  
   @override
   Widget build(BuildContext context) {
     final authService = ServicioAuth();
@@ -255,6 +258,35 @@ class _ListaMonedasState extends State<ListaMonedas> {
       return 'Ingresa una cantidad mayor a 0';
     }
     return null;
+  }
+
+  String _getMensajeVacio(List<Map<String, String>> listaCompleta) {
+    // Si no hay datos en absoluto
+    if (listaCompleta.isEmpty) {
+      return 'No hay monedas o billetes en tu colección.';
+    }
+
+    // Si el filtro de tipo está activo y no hay elementos de ese tipo
+    if (_filterTipo != null) {
+      final tipo = _filterTipo!;
+      final hayElementosTipo = listaCompleta.any((m) => m['tipo'] == tipo);
+      if (!hayElementosTipo) {
+        return tipo == 'moneda'
+            ? 'No hay monedas en tu colección.'
+            : 'No hay billetes en tu colección.';
+      }
+    }
+
+    // Si hay otros filtros (búsqueda, años, composición) que están reduciendo la lista
+    if (_searchQuery.isNotEmpty ||
+        _anioDesde != null ||
+        _anioHasta != null ||
+        _composicionQuery.isNotEmpty) {
+      return 'No hay resultados que coincidan con los filtros.';
+    }
+
+    // Fallback (no debería ocurrir)
+    return 'No hay elementos que coincidan con los filtros.';
   }
 
   final TextEditingController _paisController = TextEditingController();
@@ -609,10 +641,8 @@ class _ListaMonedasState extends State<ListaMonedas> {
                   final listaFiltrada = _filtrarLista(listaCompleta);
 
                   if (listaFiltrada.isEmpty) {
-                    return const Center(
-                      child: Text(
-                        'No hay monedas que coincidan con los filtros.',
-                      ),
+                    return Center(
+                      child: Text(_getMensajeVacio(listaCompleta)),
                     );
                   }
 
@@ -673,6 +703,7 @@ class _ListaMonedasState extends State<ListaMonedas> {
                                         CrossAxisAlignment.start,
                                     children: [
                                       Text(
+                                        overflow: TextOverflow.ellipsis,
                                         moneda['denominacion']!,
                                         style: const TextStyle(
                                           fontWeight: FontWeight.bold,
@@ -830,6 +861,7 @@ class _ListaMonedasState extends State<ListaMonedas> {
                       ),
                       const SizedBox(height: 16),
                       TextFormField(
+                        maxLength: 100,
                         controller: _denominacionController,
                         decoration: const InputDecoration(
                           labelText: 'Denominación *',
@@ -853,6 +885,9 @@ class _ListaMonedasState extends State<ListaMonedas> {
                       ),
                       const SizedBox(height: 12),
                       TextFormField(
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly, // Solo permite dígitos (0-9), bloquea el signo "-"
+                        ],
                         controller: _anioController,
                         decoration: const InputDecoration(
                           labelText: 'Año *',
@@ -970,13 +1005,59 @@ class _ListaMonedasState extends State<ListaMonedas> {
       if (idExistente != null) {
         // === EDITAR ===
         if (user != null) {
-          await FirebaseFirestore.instance
-              .collection('usuarios')
-              .doc(user.uid)
-              .collection('monedas')
-              .doc(idExistente)
-              .update(monedaParaGuardar);
-          print('✅ DOCUMENTO ACTUALIZADO EN FIRESTORE: $idExistente');
+          try {
+            await FirebaseFirestore.instance
+                .collection('usuarios')
+                .doc(user.uid)
+                .collection('monedas')
+                .doc(idExistente)
+                .update(monedaParaGuardar);
+            
+            print('✅ DOCUMENTO ACTUALIZADO EN FIRESTORE: $idExistente');
+            Navigator.of(context).pop(); // Cierra el formulario de edición
+            
+          } on FirebaseException catch (e) {
+            if (e.code == 'not-found') {
+              print('❌ ERROR: El documento $idExistente ya no existe en Firestore');
+              
+              // 1. Mostrar mensaje claro al usuario
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('No se pudo guardar esta pieza.'),
+                  backgroundColor: Colors.red,
+                  duration: Duration(seconds: 4),
+                ),
+              );
+              
+              // 2. Cerrar el formulario de edición
+              Navigator.of(context).pop();
+              
+              // 3. Cerrar también el detalle (si estamos editando desde el detalle)
+              if (Navigator.of(context).canPop()) {
+                Navigator.of(context).pop(); // Cierra el detalle (si existe)
+              }          
+            } else {
+              // Manejar otros errores de Firebase (permisos, red, etc.)
+              print('❌ ERROR DE FIRESTORE (${e.code}): ${e.message}');
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Error al guardar: ${e.message}'),
+                  backgroundColor: Colors.orange,
+                  duration: Duration(seconds: 3),
+                ),
+              );
+            }
+          } catch (e) {
+            // Manejar errores no relacionados con Firebase
+            print('❌ ERROR INESPERADO: $e');
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Error inesperado: $e'),
+                backgroundColor: Colors.orange,
+                duration: Duration(seconds: 3),
+              ),
+            );
+          }
         } else {
           print('Error: usuario no autenticado');
         }

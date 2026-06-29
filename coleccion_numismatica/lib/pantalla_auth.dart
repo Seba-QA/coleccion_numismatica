@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'servicio_auth.dart';
-import 'main.dart'; // ← Importante para usar ListaMonedas
+import 'pantalla_principal.dart';
 
 class PantallaAuth extends StatefulWidget {
   final bool isLinking;
@@ -20,6 +20,8 @@ class _PantallaAuthState extends State<PantallaAuth> {
   final _confirmController = TextEditingController();
   bool _isLogin = true;
   bool _isLoading = false;
+  int _intentosFallidos = 0;
+  bool _cuentaBloqueada = false;
 
   @override
   void dispose() {
@@ -30,10 +32,70 @@ class _PantallaAuthState extends State<PantallaAuth> {
   }
 
   Future<void> _submit() async {
+    if (_isLogin && _cuentaBloqueada) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'La cuenta está bloqueada tras varios intentos fallidos. Usa restablecer contraseña o inténtalo más tarde.',
+          ),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+          duration: Duration(seconds: 4),
+        ),
+      );
+      return;
+    }
+
     if (!_formKey.currentState!.validate()) return;
 
     setState(() => _isLoading = true);
     try {
+      if (widget.isLinking) {
+        final credential = EmailAuthProvider.credential(
+          email: _emailController.text.trim(),
+          password: _passwordController.text.trim(),
+        );
+        try {
+          await _auth.linkAnonymousAccount(credential);
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Cuenta vinculada correctamente.')),
+            );
+            Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(builder: (_) => const PantallaPrincipal()),
+              (route) => false,
+            );
+          }
+          return;
+        } on FirebaseAuthException catch (e) {
+          if (mounted) setState(() => _isLoading = false);
+          String mensaje;
+          switch (e.code) {
+            case 'invalid-credential':
+            case 'wrong-password':
+              mensaje =
+                  'Credenciales incorrectas. Verifica tu email y contraseña.';
+              break;
+            case 'provider-already-linked':
+              mensaje = 'Esta cuenta ya está vinculada a otro usuario.';
+              break;
+            case 'credential-already-in-use':
+              mensaje = 'Este correo ya se está usando en otra cuenta.';
+              break;
+            default:
+              mensaje = 'Error al vincular: ${e.message}';
+          }
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(mensaje),
+              backgroundColor: Colors.red,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+          return;
+        }
+      }
+
       User? user;
       if (_isLogin) {
         user = await _auth.signInWithEmail(
@@ -47,25 +109,13 @@ class _PantallaAuthState extends State<PantallaAuth> {
         );
       }
 
-      if (widget.isLinking &&
-          user != null &&
-          _auth.currentUser != null &&
-          _auth.currentUser!.isAnonymous) {
-        final credential = EmailAuthProvider.credential(
-          email: _emailController.text.trim(),
-          password: _passwordController.text.trim(),
-        );
-        await _auth.linkAnonymousAccount(credential);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Cuenta vinculada correctamente.')),
-        );
-      }
-
       if (mounted) {
+        _intentosFallidos = 0;
+        _cuentaBloqueada = false;
         // Usamos pushReplacement para evitar pantalla negra
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (_) => const ListaMonedas()),
+          MaterialPageRoute(builder: (_) => const PantallaPrincipal()),
         );
       }
     } on FirebaseAuthException catch (e) {
@@ -75,7 +125,15 @@ class _PantallaAuthState extends State<PantallaAuth> {
           mensaje = 'No existe una cuenta con este correo electrónico';
           break;
         case 'wrong-password':
-          mensaje = 'Contraseña incorrecta. Por favor, inténtalo de nuevo';
+          _intentosFallidos++;
+          if (_intentosFallidos >= 4) {
+            _cuentaBloqueada = true;
+            mensaje =
+                'Contraseña incorrecta. Tu cuenta ha sido bloqueada tras 4 intentos fallidos.';
+          } else {
+            mensaje =
+                'Contraseña incorrecta. Te quedan ${4 - _intentosFallidos} intentos.';
+          }
           break;
         case 'email-already-in-use':
           mensaje =
@@ -94,6 +152,22 @@ class _PantallaAuthState extends State<PantallaAuth> {
           mensaje =
               'El inicio de sesión con email/contraseña no está habilitado';
           break;
+        case 'too-many-requests':
+          _cuentaBloqueada = true;
+          mensaje =
+              'Tu cuenta ha sido bloqueada tras varios intentos fallidos. Restablece la contraseña para recuperarla.';
+          break;
+        case 'invalid-credential':
+          _intentosFallidos++;
+          if (_intentosFallidos >= 4) {
+            _cuentaBloqueada = true;
+            mensaje =
+                'Tu cuenta ha sido bloqueada tras varios intentos fallidos. Restablece la contraseña para recuperarla.';
+          } else {
+            mensaje =
+                'Credenciales incorrectas. Verifica tu email y contraseña. Te quedan ${4 - _intentosFallidos} intentos.';
+          }
+          break;
         default:
           mensaje = 'Error al iniciar sesión: ${e.message}';
       }
@@ -110,21 +184,24 @@ class _PantallaAuthState extends State<PantallaAuth> {
   }
 
   Future<void> _googleSignIn() async {
+    if (!mounted) return;
     setState(() => _isLoading = true);
+
     try {
       if (widget.isLinking) {
-        // Vinculación con cuenta anónima
         final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
         if (googleUser == null) {
           if (mounted) setState(() => _isLoading = false);
           return;
         }
+
         final GoogleSignInAuthentication googleAuth =
             await googleUser.authentication;
         final credential = GoogleAuthProvider.credential(
           accessToken: googleAuth.accessToken,
           idToken: googleAuth.idToken,
         );
+
         await _auth.linkAnonymousAccount(credential);
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -132,38 +209,67 @@ class _PantallaAuthState extends State<PantallaAuth> {
               content: Text('Cuenta de Google vinculada correctamente.'),
             ),
           );
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (_) => const ListaMonedas()),
+          Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(builder: (_) => const PantallaPrincipal()),
+            (route) => false,
           );
         }
-      } else {
-        // Inicio de sesión normal con Google
-        User? user = await _auth.signInWithGoogle();
-        if (user != null && mounted) {
-          // Pequeño retraso para asegurar estado (opcional)
-          await Future.delayed(const Duration(milliseconds: 100));
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (_) => const ListaMonedas()),
-          );
-        } else if (mounted) {
-          setState(() => _isLoading = false);
-        }
+        return;
+      }
+
+      final user = await _auth.signInWithGoogle();
+      if (user != null && mounted) {
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (_) => const PantallaPrincipal()),
+          (route) => false,
+        );
+      } else if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    } on FirebaseAuthException catch (e) {
+      if (mounted) setState(() => _isLoading = false);
+      String mensaje;
+      switch (e.code) {
+        case 'account-exists-with-different-credential':
+          mensaje =
+              'Esta cuenta de Google ya está registrada con otro método. Inicia sesión con tu email y contraseña.';
+          break;
+        case 'credential-already-in-use':
+          mensaje = 'Esta cuenta de Google ya está vinculada a otro usuario.';
+          break;
+        case 'network-request-failed':
+          mensaje = 'No hay conexión a internet. Verifica tu red.';
+          break;
+        case 'popup-closed-by-user':
+          mensaje = 'Se canceló el inicio de sesión con Google.';
+          break;
+        default:
+          mensaje = 'Error con Google: ${e.message ?? 'Inténtalo de nuevo.'}';
+      }
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(mensaje),
+            backgroundColor: Theme.of(context).colorScheme.error,
+            behavior: SnackBarBehavior.floating,
+            duration: const Duration(seconds: 3),
+          ),
+        );
       }
     } catch (e) {
-      print('Error en Google Sign-In: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text(
-            'Error al iniciar sesión con Google. Verifica tu conexión e inténtalo de nuevo.',
-          ),
-          backgroundColor: Colors.red.shade700,
-          behavior: SnackBarBehavior.floating,
-          duration: const Duration(seconds: 3),
-        ),
-      );
       if (mounted) setState(() => _isLoading = false);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'No se pudo completar el inicio de sesión con Google.',
+            ),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+            duration: Duration(seconds: 3),
+          ),
+        );
+      }
     }
   }
 
@@ -173,11 +279,13 @@ class _PantallaAuthState extends State<PantallaAuth> {
     );
 
     return showDialog(
-          context: context,
-          barrierDismissible: false,
-          barrierColor: Colors.black54, // ← Oscurece el fondo de la pantalla
-          builder: (context) => AlertDialog(
-            backgroundColor: Theme.of(context).colorScheme.surface, // ← Fondo sólido
+      context: context,
+      barrierDismissible: false,
+      barrierColor: Colors.black54, // ← Oscurece el fondo de la pantalla
+      builder:
+          (context) => AlertDialog(
+            backgroundColor:
+                Theme.of(context).colorScheme.surface, // ← Fondo sólido
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
             ),
@@ -241,7 +349,8 @@ class _PantallaAuthState extends State<PantallaAuth> {
                         mensaje = 'El correo electrónico no es válido.';
                         break;
                       case 'network-request-failed':
-                        mensaje = 'No hay conexión a internet. Verifica tu red.';
+                        mensaje =
+                            'No hay conexión a internet. Verifica tu red.';
                         break;
                       default:
                         mensaje = 'Error: ${e.message}';
@@ -287,7 +396,11 @@ class _PantallaAuthState extends State<PantallaAuth> {
       ),
       child: Scaffold(
         appBar: AppBar(
-          title: Text(_isLogin ? 'Iniciar sesión' : 'Registrarse'),
+          title: Text(
+            widget.isLinking
+                ? 'Vincular cuenta'
+                : (_isLogin ? 'Iniciar sesión' : 'Registrarse'),
+          ),
         ),
         body: Padding(
           padding: const EdgeInsets.all(20),
@@ -318,46 +431,60 @@ class _PantallaAuthState extends State<PantallaAuth> {
                   const SizedBox(height: 24),
 
                   // Pestañas login/registro
-                  SegmentedButton<String>(
-                    segments: const [
-                      ButtonSegment(
-                        value: 'login',
-                        label: Text('Iniciar sesión'),
+                  if (!widget.isLinking) ...[
+                    SegmentedButton<String>(
+                      segments: const [
+                        ButtonSegment(
+                          value: 'login',
+                          label: Text('Iniciar sesión'),
+                        ),
+                        ButtonSegment(
+                          value: 'registro',
+                          label: Text('Registrarse'),
+                        ),
+                      ],
+                      selected: {_isLogin ? 'login' : 'registro'},
+                      onSelectionChanged: (Set<String> selection) {
+                        setState(() {
+                          _isLogin = selection.first == 'login';
+                          _emailController.clear();
+                          _passwordController.clear();
+                          _confirmController.clear();
+                          _intentosFallidos = 0;
+                          _cuentaBloqueada = false;
+                        });
+                      },
+                      style: ButtonStyle(
+                        backgroundColor: WidgetStateProperty.resolveWith((
+                          states,
+                        ) {
+                          if (states.contains(WidgetState.selected)) {
+                            return Theme.of(context).colorScheme.primary;
+                          }
+                          return Theme.of(context).colorScheme.surface;
+                        }),
+                        foregroundColor: WidgetStateProperty.resolveWith((
+                          states,
+                        ) {
+                          if (states.contains(WidgetState.selected)) {
+                            return Theme.of(context).colorScheme.onPrimary;
+                          }
+                          return Theme.of(context).colorScheme.onSurface;
+                        }),
                       ),
-                      ButtonSegment(
-                        value: 'registro',
-                        label: Text('Registrarse'),
-                      ),
-                    ],
-                    selected: {_isLogin ? 'login' : 'registro'},
-                    onSelectionChanged: (Set<String> selection) {
-                      setState(() {
-                        _isLogin = selection.first == 'login';
-                        _emailController.clear();
-                        _passwordController.clear();
-                        _confirmController.clear();
-                      });
-                      _formKey.currentState?.reset();
-                    },
-                    style: ButtonStyle(
-                      backgroundColor: WidgetStateProperty.resolveWith((
-                        states,
-                      ) {
-                        if (states.contains(WidgetState.selected)) {
-                          return Theme.of(context).colorScheme.primary;
-                        }
-                        return Theme.of(context).colorScheme.surface;
-                      }),
-                      foregroundColor: WidgetStateProperty.resolveWith((
-                        states,
-                      ) {
-                        if (states.contains(WidgetState.selected)) {
-                          return Theme.of(context).colorScheme.onPrimary;
-                        }
-                        return Theme.of(context).colorScheme.onSurface;
-                      }),
                     ),
-                  ),
+                    const SizedBox(height: 20),
+                  ] else ...[
+                    const SizedBox(height: 8),
+                    const Text(
+                      'Crea una cuenta para vincular tu colección',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                  ],
                   const SizedBox(height: 20),
 
                   // Campo email
@@ -392,7 +519,7 @@ class _PantallaAuthState extends State<PantallaAuth> {
                         return 'Mínimo 6 caracteres';
                       }
                       return null;
-                    }
+                    },
                   ),
 
                   // Enlace "¿Olvidaste tu contraseña?" (solo login)
@@ -436,18 +563,34 @@ class _PantallaAuthState extends State<PantallaAuth> {
                     const CircularProgressIndicator()
                   else
                     OutlinedButton(
-                      onPressed: _submit,
+                      onPressed:
+                          (_isLogin && _cuentaBloqueada) ? null : _submit,
                       style: ElevatedButton.styleFrom(
                         minimumSize: const Size(double.infinity, 45),
                       ),
-                      child: Text(_isLogin ? 'Iniciar sesión' : 'Registrarse'),
+                      child: Text(
+                        widget.isLinking
+                            ? 'Vincular cuenta'
+                            : (_isLogin ? 'Iniciar sesión' : 'Registrarse'),
+                      ),
                     ),
+                  if (_isLogin && _cuentaBloqueada) ...[
+                    const SizedBox(height: 12),
+                    Text(
+                      'La cuenta está bloqueada tras 4 intentos fallidos. Restablece la contraseña para recuperarla.',
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.error,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
 
                   const SizedBox(height: 12),
 
                   // Botón Google
                   OutlinedButton.icon(
-                    onPressed: _googleSignIn,
+                    onPressed: _isLoading ? null : _googleSignIn,
                     icon: const Icon(Icons.g_mobiledata, color: Colors.red),
                     label: const Text('Continuar con Google'),
                     style: OutlinedButton.styleFrom(
@@ -458,35 +601,38 @@ class _PantallaAuthState extends State<PantallaAuth> {
                   const SizedBox(height: 12),
 
                   // Botón invitado
-                  TextButton(
-                    onPressed: () async {
-                      setState(() => _isLoading = true);
-                      try {
-                        await _auth.iniciarSesionAnonimo();
-                        if (mounted) {
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const ListaMonedas(),
+                  if (!widget.isLinking) ...[
+                    const SizedBox(height: 12),
+                    TextButton(
+                      onPressed: () async {
+                        setState(() => _isLoading = true);
+                        try {
+                          await _auth.iniciarSesionAnonimo();
+                          if (mounted) {
+                            Navigator.of(context).pushAndRemoveUntil(
+                              MaterialPageRoute(
+                                builder: (_) => const PantallaPrincipal(),
+                              ),
+                              (route) => false,
+                            );
+                          }
+                        } catch (e) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: const Text(
+                                'No se pudo ingresar como invitado. Inténtalo de nuevo.',
+                              ),
+                              backgroundColor: Colors.red.shade700,
+                              behavior: SnackBarBehavior.floating,
                             ),
                           );
+                        } finally {
+                          if (mounted) setState(() => _isLoading = false);
                         }
-                      } catch (e) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: const Text(
-                              'No se pudo ingresar como invitado. Inténtalo de nuevo.',
-                            ),
-                            backgroundColor: Colors.red.shade700,
-                            behavior: SnackBarBehavior.floating,
-                          ),
-                        );
-                      } finally {
-                        if (mounted) setState(() => _isLoading = false);
-                      }
-                    },
-                    child: const Text('Seguir como invitado →'),
-                  ),
+                      },
+                      child: const Text('Seguir como invitado →'),
+                    ),
+                  ],
                 ],
               ),
             ),

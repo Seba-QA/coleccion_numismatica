@@ -66,6 +66,7 @@ class ServicioAuth {
     final user = _auth.currentUser;
     if (user != null && user.isAnonymous) {
       await user.linkWithCredential(credential);
+      await user.reload();
       print('Cuenta anónima vinculada con éxito');
     } else {
       throw Exception('No hay usuario anónimo o ya está vinculado');
@@ -90,7 +91,19 @@ class ServicioAuth {
   }
 
   Future<void> cerrarSesion() async {
-    await _googleSignIn.signOut();
-    await _auth.signOut();
+    try {
+      // Primero desvinculamos Google Sign In
+      await _googleSignIn.signOut();
+    } catch (e) {
+      print('Error al desvincularse de Google: $e');
+    }
+
+    try {
+      // Luego cerramos sesión en Firebase
+      await _auth.signOut();
+    } catch (e) {
+      print('Error al cerrar sesión en Firebase: $e');
+      rethrow;
+    }
   }
 }

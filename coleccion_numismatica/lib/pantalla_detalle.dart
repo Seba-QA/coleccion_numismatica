@@ -152,7 +152,7 @@ class _PantallaDetalleState extends State<PantallaDetalle>
             errorBuilder: (context, error, stackTrace) {
               return Center(
                 child: Text(
-                  'Error',
+                  'Sin imagen',
                   style: TextStyle(color: Colors.grey.shade500),
                 ),
               );
@@ -170,7 +170,7 @@ class _PantallaDetalleState extends State<PantallaDetalle>
             errorBuilder: (context, error, stackTrace) {
               return Center(
                 child: Text(
-                  'Error',
+                  'Sin imagen',
                   style: TextStyle(color: Colors.grey.shade500),
                 ),
               );
@@ -386,7 +386,7 @@ class _PantallaDetalleState extends State<PantallaDetalle>
                 height: esMoneda ? 300 : 200,
                 width: double.infinity,
                 color: Colors.grey.shade300,
-                child: const Center(child: Text('Error al cargar la imagen')),
+                child: const Center(child: Text('Sin imagen')),
               );
             },
           ),
