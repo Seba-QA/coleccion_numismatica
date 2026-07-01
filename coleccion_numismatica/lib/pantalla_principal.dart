@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'main.dart';
 import 'pantalla_perfil.dart';
 import 'pantalla_estadisticas.dart';
+import 'pantalla_catalogos.dart';
 
 class PantallaPrincipal extends StatefulWidget {
   const PantallaPrincipal({super.key});
@@ -16,6 +17,7 @@ class _PantallaPrincipalState extends State<PantallaPrincipal> {
   // Lista de páginas (widgets)
   final List<Widget> _paginas = const [
     ListaMonedas(),
+    PantallaCatalogos(),
     PantallaEstadisticas(),
     PantallaPerfil(),
   ];
@@ -24,12 +26,13 @@ class _PantallaPrincipalState extends State<PantallaPrincipal> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title:
-            _indiceSeleccionado == 0
+        title:_indiceSeleccionado == 0
                 ? const Text('Mi Colección')
                 : (_indiceSeleccionado == 1
-                    ? const Text('Estadísticas')
-                    : const Text('Mi Perfil')),
+                  ? const Text('Catálogos')
+                  : (_indiceSeleccionado == 2
+                      ? const Text('Estadísticas')
+                      : const Text('Mi Perfil'))),
       ),
       body: IndexedStack(index: _indiceSeleccionado, children: _paginas),
       bottomNavigationBar: BottomNavigationBar(
@@ -47,6 +50,10 @@ class _PantallaPrincipalState extends State<PantallaPrincipal> {
           BottomNavigationBarItem(
             icon: Icon(Icons.collections_bookmark),
             label: 'Mi Colección',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.folder),
+            label: 'Catálogos',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.trending_up),

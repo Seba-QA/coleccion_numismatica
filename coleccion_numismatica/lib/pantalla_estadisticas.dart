@@ -150,13 +150,13 @@ class PantallaEstadisticas extends StatelessWidget {
                     _buildResumenCard(
                       'Total piezas',
                       '$totalPiezas',
-                      Theme.of(context).colorScheme.primary,
+                      Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                     const SizedBox(width: 12),
                     _buildResumenCard(
                       'Países',
                       '$totalPaises',
-                      Theme.of(context).colorScheme.onSurfaceVariant,
+                      Theme.of(context).colorScheme.tertiary,
                     ),
                   ],
                 ),
@@ -166,7 +166,7 @@ class PantallaEstadisticas extends StatelessWidget {
                     _buildResumenCard(
                       'Monedas',
                       '$totalMonedas',
-                      Theme.of(context).colorScheme.tertiary ?? Colors.orange,
+                      Theme.of(context).colorScheme.primary,
                     ),
                     const SizedBox(width: 12),
                     _buildResumenCard(
@@ -307,7 +307,7 @@ class PantallaEstadisticas extends StatelessWidget {
                   barRods: [
                     BarChartRodData(
                       toY: item.value.toDouble(),
-                      color: Theme.of(context).colorScheme.primary,
+                      color: Theme.of(context).colorScheme.tertiary,
                       width: 20,
                       borderRadius: BorderRadius.circular(4),
                     ),
