@@ -10,6 +10,8 @@ class Catalogo {
   final List<String>? listaOficial;
   final String? campoComparacion;
   final bool completado;
+  final Map<String, bool>? estadosManuales;
+  final int progreso; // 👈 NUEVO
 
   Catalogo({
     required this.id,
@@ -21,6 +23,8 @@ class Catalogo {
     this.listaOficial,
     this.campoComparacion,
     this.completado = false,
+    this.estadosManuales,
+    this.progreso = 0, // 👈 NUEVO
   });
 
   factory Catalogo.fromFirestore(Map<String, dynamic> data, String id) {
@@ -34,6 +38,10 @@ class Catalogo {
       listaOficial: data['listaOficial'] != null ? List<String>.from(data['listaOficial']) : null,
       campoComparacion: data['campoComparacion'],
       completado: data['completado'] ?? false,
+      estadosManuales: data['estadosManuales'] != null
+          ? Map<String, bool>.from(data['estadosManuales'])
+          : null,
+      progreso: data['progreso'] ?? 0, // 👈 NUEVO
     );
   }
 
@@ -47,6 +55,8 @@ class Catalogo {
       'listaOficial': listaOficial,
       'campoComparacion': campoComparacion,
       'completado': completado,
+      'estadosManuales': estadosManuales,
+      'progreso': progreso, // 👈 NUEVO
     };
   }
 }

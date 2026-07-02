@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'servicio_catalogos.dart';
 import 'models/catalogo.dart';
+import 'pantalla_crear_catalogo.dart';
+import 'pantalla_detalle_catalogo.dart';
 
 class PantallaCatalogos extends StatefulWidget {
   const PantallaCatalogos({super.key});
@@ -23,9 +25,7 @@ class _PantallaCatalogosState extends State<PantallaCatalogos> {
             return const Center(child: CircularProgressIndicator());
           }
           if (snapshot.hasError) {
-            return Center(
-              child: Text('Error: ${snapshot.error}'),
-            );
+            return Center(child: Text('Error: ${snapshot.error}'));
           }
           if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return Center(
@@ -40,18 +40,12 @@ class _PantallaCatalogosState extends State<PantallaCatalogos> {
                   const SizedBox(height: 16),
                   Text(
                     'No tienes catálogos aún',
-                    style: TextStyle(
-                      fontSize: 18,
-                      color: Colors.grey.shade600,
-                    ),
+                    style: TextStyle(fontSize: 18, color: Colors.grey.shade600),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     'Crea tu primer catálogo con el botón +',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey.shade500,
-                    ),
+                    style: TextStyle(fontSize: 14, color: Colors.grey.shade500),
                   ),
                 ],
               ),
@@ -72,10 +66,9 @@ class _PantallaCatalogosState extends State<PantallaCatalogos> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Crear catálogo (próximamente)'),
-            ),
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const PantallaCrearCatalogo()),
           );
         },
         child: const Icon(Icons.add),
@@ -84,12 +77,12 @@ class _PantallaCatalogosState extends State<PantallaCatalogos> {
   }
 
   Widget _buildCatalogoCard(Catalogo catalogo) {
-    // Calcular progreso
-    final tieneLista = catalogo.listaOficial != null && catalogo.listaOficial!.isNotEmpty;
-    final progreso = _calcularProgreso(catalogo);
+    final tieneLista =
+        catalogo.listaOficial != null && catalogo.listaOficial!.isNotEmpty;
+    final total = tieneLista ? catalogo.listaOficial!.length : 0;
+    final progreso = catalogo.progreso ?? 0;
     final completado = catalogo.completado;
 
-    // Color según estado
     Color estadoColor;
     if (completado) {
       estadoColor = Colors.green;
@@ -103,17 +96,15 @@ class _PantallaCatalogosState extends State<PantallaCatalogos> {
       margin: const EdgeInsets.only(bottom: 16),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(
-          color: estadoColor,
-          width: 2,
-        ),
+        side: BorderSide(color: estadoColor, width: 2),
       ),
       elevation: 2,
       child: InkWell(
         onTap: () {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Detalle de "${catalogo.nombre}" (próximamente)'),
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => PantallaDetalleCatalogo(catalogoId: catalogo.id),
             ),
           );
         },
@@ -125,11 +116,7 @@ class _PantallaCatalogosState extends State<PantallaCatalogos> {
             children: [
               Row(
                 children: [
-                  Icon(
-                    Icons.folder,
-                    color: estadoColor,
-                    size: 24,
-                  ),
+                  Icon(Icons.folder, color: estadoColor, size: 24),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
@@ -144,15 +131,13 @@ class _PantallaCatalogosState extends State<PantallaCatalogos> {
                   ),
                 ],
               ),
-              if (catalogo.descripcion != null && catalogo.descripcion!.isNotEmpty)
+              if (catalogo.descripcion != null &&
+                  catalogo.descripcion!.isNotEmpty)
                 Padding(
                   padding: const EdgeInsets.only(top: 4, left: 36),
                   child: Text(
                     catalogo.descripcion!,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey.shade600,
-                    ),
+                    style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -163,12 +148,11 @@ class _PantallaCatalogosState extends State<PantallaCatalogos> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Etiqueta de progreso
                     Row(
                       children: [
                         Text(
                           tieneLista
-                              ? '$progreso/${catalogo.listaOficial!.length} completados'
+                              ? '$progreso / $total completados'
                               : '${_contarPiezas(catalogo)} piezas',
                           style: TextStyle(
                             fontSize: 14,
@@ -199,14 +183,11 @@ class _PantallaCatalogosState extends State<PantallaCatalogos> {
                       ],
                     ),
                     const SizedBox(height: 6),
-                    // Barra de progreso
                     if (tieneLista)
                       ClipRRect(
                         borderRadius: BorderRadius.circular(4),
                         child: LinearProgressIndicator(
-                          value: catalogo.listaOficial!.isEmpty
-                              ? 0
-                              : progreso / catalogo.listaOficial!.length,
+                          value: total == 0 ? 0 : progreso / total,
                           minHeight: 6,
                           backgroundColor: Colors.grey.shade200,
                           valueColor: AlwaysStoppedAnimation<Color>(
@@ -224,13 +205,8 @@ class _PantallaCatalogosState extends State<PantallaCatalogos> {
     );
   }
 
-  // Funciones auxiliares para calcular progreso
-  int _calcularProgreso(Catalogo catalogo) {
-    return catalogo.completado ? (catalogo.listaOficial?.length ?? 0) : 0;
-  }
-
   int _contarPiezas(Catalogo catalogo) {
-    // También dummy hasta la Sesión 4
+    // Por ahora dummy, se puede implementar más adelante
     return 0;
   }
 }

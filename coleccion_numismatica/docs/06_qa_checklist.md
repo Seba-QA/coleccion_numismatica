@@ -241,6 +241,61 @@
 
 ---
 
+## Pruebas de catálogos (Sesión 2)
+
+### Navegación
+- [ ] La pestaña "Catálogos" está visible en el menú inferior.
+- [ ] Al tocar la pestaña, se abre la pantalla de lista de catálogos.
+- [ ] El título del `AppBar` cambia a "Catálogos".
+
+### Pantalla de lista (vacía)
+- [ ] Si no hay catálogos, se muestra un mensaje indicando que no hay catálogos.
+- [ ] Se muestra un ícono de carpeta y un mensaje amigable.
+- [ ] El FAB está visible y muestra un mensaje temporal.
+
+### Pantalla de lista (con datos)
+- [ ] Los catálogos se cargan en tiempo real al crearlos (usando `StreamBuilder`).
+- [ ] Cada tarjeta muestra el nombre, descripción (si existe), progreso y barra de progreso.
+- [ ] El color del borde cambia según el estado: Verde (completado), Naranja (pendiente), Gris (sin datos).
+
+### Reglas de seguridad
+- [ ] El usuario solo ve sus propios catálogos (no los de otros usuarios).
+- [ ] No hay errores de `permission-denied`.
+
+---
+
+## Pruebas de creación de catálogos (Sesión 3)
+
+### Creación básica
+- [ ] Crear catálogo solo con nombre (sin lista oficial).
+- [ ] Crear catálogo con nombre y descripción.
+
+### Creación con lista oficial
+- [ ] Activar "Lista oficial" y agregar elementos.
+- [ ] Intentar guardar con lista oficial vacía (debe mostrar error).
+- [ ] Intentar guardar con lista oficial pero sin campo de comparación (debe mostrar error).
+- [ ] Agregar un elemento duplicado a la lista (debe mostrar error).
+- [ ] Eliminar un elemento de la lista con el botón `-`.
+
+### Validaciones
+- [ ] Intentar guardar sin nombre (debe mostrar error).
+- [ ] Intentar guardar con nombre que genera un `tag` ya existente (debe mostrar error).
+- [ ] Verificar que el `tag` se genera correctamente (sin tildes, minúsculas, guiones bajos).
+
+### Comportamiento visual
+- [ ] Al activar el switch "Lista oficial", se despliega la sección correspondiente.
+- [ ] Al desactivar el switch, la sección se oculta y se limpian los datos.
+- [ ] El botón "+" agrega elementos y limpia el campo de texto.
+- [ ] El botón "Guardar" muestra feedback de éxito o error.
+
+## Pruebas de tachado manual en catálogos
+
+- [x] Al tocar un elemento de la lista oficial, el icono cambia y el texto se tacha inmediatamente.
+- [x] Al desmarcar un elemento, el icono vuelve a su estado original y el tachado desaparece de inmediato.
+- [x] El progreso (barra y contador) se actualiza al tachar/destachar.
+- [x] Al salir y volver al catálogo, los tachados manuales persisten (guardados en Firestore).
+---
+
 ## 📝 Resultado final
 
 | Fecha | Estado | Notas |

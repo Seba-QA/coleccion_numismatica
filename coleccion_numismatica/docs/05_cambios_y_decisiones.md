@@ -171,7 +171,13 @@
 - **Fecha**: 23/06/2026
 - **Motivo**: Ofrecer al usuario una forma de generar un catálogo legible y compartible de su colección, complementando la exportación JSON (que es para respaldo e importación).
 
-Ahora que el login y perfil están funcionando, el usuario puede registrarse y vincular su cuenta anónima. Esto completa una de las tareas más importantes. Vamos a actualizar la documentación y luego definir los próximos pasos.
+## Decisión: Implementar funcionalidad de "Catálogos"
+- **Fecha**: 01/07/2026
+- **Motivo**: Permitir al usuario organizar su colección en listas temáticas (ej. "10 pesos chilenos", "Monedas del mundo") y marcar automáticamente el progreso de cada una.
+
+## Decisión: Implementar creación de catálogos en pantalla completa en lugar de diálogo
+- **Fecha**: 01/07/2026
+- **Motivo**: La lista oficial puede contener muchos elementos (ej. 37 años) y un diálogo sería demasiado pequeño. Una pantalla completa permite una mejor experiencia de usuario.
 
 ## Problemas resueltos
 1. ADB no reconocido → agregar platform-tools al PATH
@@ -198,6 +204,7 @@ Ahora que el login y perfil están funcionando, el usuario puede registrarse y v
 22. Se corrigió edición desde detalle no persistía (segunda edición) usando `_id` en lugar de `indice` para la actualización en Firestore.
 23. El detalle no se actualizaba tras editar, por lo que, se implementó `StreamBuilder` para escuchar cambios en Firestore.
 24. Se desactivó la redimensión del `Scaffold` con `resizeToAvoidBottomInset: false` al editar.
+25. El estado manual `_manualCompletado` se recargaba desde Firestore en cada reconstrucción de `PantallaDetalleCatalogo`, sobrescribiendo los cambios locales y causando que el tachado visual no se actualizara inmediatamente al tocar un elemento.
 
 
 ## Pendientes para próxima sesión
@@ -207,5 +214,6 @@ Ahora que el login y perfil están funcionando, el usuario puede registrarse y v
 - Exportar/importar datos (JSON/CSV)✅
 - Mejoras visuales (modo oscuro, animaciones)✅
 - Pruebas en modo release (APK sin conexión al PC)✅
-- Mejora interfaz de las distintas pantallas⌚
-- Creacion de estadisticas
+- Mejora interfaz de las distintas pantallas✅
+- Creacion de estadisticas✅
+- Creacion de catalogos

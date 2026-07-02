@@ -188,7 +188,7 @@
   - **Nota**: Por ahora, el PDF solo incluye texto y números. La inclusión de imágenes se considera una mejora futura.
 
 
-## Pantalla de estadísticas (nueva)
+## Pantalla de estadísticas
 
 Accesible desde la tercera pestaña del menú inferior (icono de gráfico).
 
@@ -209,5 +209,51 @@ Accesible desde la tercera pestaña del menú inferior (icono de gráfico).
   - **Nombres de países en eje X**: Los nombres de los países se muestran debajo de las barras, con capitalización automática (primera letra mayúscula) y normalización de texto para agrupar correctamente variaciones ortográficas (mayúsculas, minúsculas, tildes, espacios, caracteres especiales).
   - **Eje X limpio para décadas**: En el gráfico de distribución por décadas, solo se muestra el año de la década (sin números redundantes). La cantidad se lee en el eje Y.
   - **Agrupación de países**: Los países se normalizan y agrupan, evitando duplicados por diferencias de escritura. El nombre mostrado se capitaliza automáticamente.
+  
+## Nueva pestaña: Catálogos
+
+La app ahora cuenta con una cuarta pestaña en el menú inferior: **Catálogos**.
+
+### Pantalla de lista de catálogos (`PantallaCatalogos`)
+- **Propósito**: Mostrar todos los catálogos creados por el usuario.
+- **Comportamiento**:
+  - Carga automática mediante `StreamBuilder` que escucha la colección `catalogos` en Firestore.
+  - Cada catálogo se muestra en una tarjeta con:
+    - Nombre y descripción (si existe).
+    - Progreso: `X/Y completados` (si tiene lista oficial) o `X piezas` (si no tiene lista).
+    - Barra de progreso visual.
+    - Borde de color según el estado: 🟢 Verde (completado), 🟠 Naranja (pendiente), ⚪ Gris (sin datos).
+  - Botón flotante (FAB) con icono `+` para crear un nuevo catálogo (pendiente de implementar en Sesión 3).
+  - Al tocar una tarjeta, navega al detalle del catálogo (pendiente de implementar en Sesión 4).
+
+### Navegación
+- El menú inferior ahora tiene 4 ítems: **Colección**, **Catálogos**, **Estadísticas**, **Perfil**.
+
+## Pantalla de creación de catálogos (`PantallaCrearCatalogo`)
+
+### Acceso
+- Desde la pantalla de lista de catálogos, tocando el botón flotante (FAB) con icono `+`.
+
+### Campos
+- **Nombre del catálogo** (obligatorio): Texto único que identifica el catálogo. A partir de este nombre se genera automáticamente el `tag` (minúsculas, sin tildes, espacios reemplazados por guiones bajos).
+- **Descripción** (opcional): Texto adicional para describir el propósito del catálogo.
+- **Lista oficial** (opcional): Activable mediante un `Switch`.
+  - Si está activada, se despliega una sección con:
+    - **Campo de texto + botón `+`**: Permite agregar elementos uno a uno (ej. años, países, estados).
+    - **Lista visual de elementos agregados**: Cada elemento muestra un botón `-` (rojo) para eliminarlo.
+    - **Campo de comparación** (obligatorio si la lista oficial está activa): Menú desplegable con opciones: `Año`, `País`, `Denominación`. Define con qué campo de las monedas se comparará la lista oficial durante la sincronización.
+
+### Comportamiento
+- **Validaciones**:
+  - El nombre no puede estar vacío.
+  - Si la lista oficial está activa, debe tener al menos un elemento.
+  - Si la lista oficial está activa, debe seleccionarse un campo de comparación.
+- **Guardado**:
+  - Al tocar "Guardar", se crea un nuevo documento en la colección `catalogos` en Firestore.
+  - El `tag` se genera automáticamente a partir del nombre.
+  - Si el `tag` ya existe para el usuario, se muestra un error y se permite cambiar el nombre.
+- **Feedback**:
+  - SnackBar de éxito al crear el catálogo.
+  - SnackBar de error si falla la creación (ej. tag duplicado, problemas de red).
 
 
